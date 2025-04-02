@@ -30,10 +30,11 @@
 
 .bg-img {
   position: absolute;
-  bottom: -400px;
-  right: -300px;
+  bottom: -20vh;
+  right: -20vw;
   scale: 1;
   transition: scale 1s;
+  z-index: -1;
 }
 
 .bg-img:hover {
@@ -49,6 +50,10 @@
   transition: 0.3s;
 }
 
+h1 {
+  z-index: 1;
+}
+
 @media screen and (min-width: 700px) {
   h1 {
     font-family: "Lepka", sans-serif;
@@ -62,12 +67,20 @@
     right: 70px;
     top: 30px;
   }
+
+  .gallery {
+    bottom: 150%;
+  }
+
+  .bg-img {
+    width: 800px;
+  }
 }
 
 @media screen and (min-width: 300px) and (max-width: 700px) {
   h1 {
     font-family: "Lepka", sans-serif;
-    font-size: 78px;
+    font-size: 64px;
     margin-top: 100px;
     color: transparent;
     -webkit-text-stroke: 0.01px black;
@@ -77,6 +90,14 @@
     position: absolute;
     right: 20px;
     top: 30px;
+  }
+
+  .gallery {
+    bottom: 100%;
+  }
+
+  .bg-img {
+    width: 500px;
   }
 }
 
@@ -228,4 +249,53 @@
 
 .enter-btn:hover {
   color: black;
+}
+
+.find-btn-cont {
+  display: flex;
+  align-items: center;
+  gap: 10px
+}
+
+.find-btn {
+  font-family: SF-Pro-Display-Thin, sans-serif;
+  font-size: 40px;
+  background: white;
+  border-radius: 15px;
+  padding: 5px 10px;
+  box-shadow: 0 4px 40px 0 rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.find-btn:hover {
+  box-shadow: 0 4px 40px 0 rgba(0, 0, 0, 0.1);;
+}
+
+.gallery {
+  position: absolute;
+  z-index: -1;
+  display: flex;
+  gap: 10px;
+  rotate: -25deg;
+  left: -100px; /* Начинаем с левого края */
+  width: max-content; /* Чтобы ширина соответствовала контенту */
+  animation: scrollRight 100s infinite linear; /* Бесконечная анимация вправо */
+}
+
+.card {
+  width: 200px;
+  height: 250px;
+  border-radius: 10px;
+  background: #D9D9D9;
+  flex-shrink: 0; /* Предотвращаем сжатие карточек */
+}
+
+@keyframes scrollRight {
+  0% {
+    transform: translateX(0); /* Начало с текущей позиции */
+  }
+  100% {
+    transform: translateX(-50%); /* Сдвиг на половину ширины галереи */
+  }
 }

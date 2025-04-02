@@ -23,6 +23,10 @@ const stylistSchema = new mongoose.Schema({
     photoLink: {
         type: String,
     },
+    city: {
+        type: String,
+        required: true,
+    },
 });
 
 module.exports = mongoose.model('Stylist', stylistSchema);
