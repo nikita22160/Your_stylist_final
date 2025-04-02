@@ -3,14 +3,17 @@ import { createSlice } from '@reduxjs/toolkit';
 const authSlice = createSlice({
     name: 'auth',
     initialState: {
-        isAuthenticated: false, // Изначально пользователь не авторизован
+        isAuthenticated: false,
+        user: null, // Добавляем поле для данных пользователя
     },
     reducers: {
-        login(state) {
-            state.isAuthenticated = true; // Действие для входа
+        login(state, action) {
+            state.isAuthenticated = true;
+            state.user = action.payload; // Сохраняем данные пользователя
         },
         logout(state) {
-            state.isAuthenticated = false; // Действие для выхода
+            state.isAuthenticated = false;
+            state.user = null;
         },
     },
 });

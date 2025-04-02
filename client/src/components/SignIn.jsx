@@ -2,13 +2,10 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { login } from '../redux/slices/authSlice.js';
 
-export default function Register({ closeModal, switchToSignIn }) {
+export default function SignIn({ closeModal, switchToRegister }) {
     const [formData, setFormData] = useState({
-        name: '',
-        surname: '',
         phone: '',
         password: '',
-        confirmPassword: '',
     });
     const dispatch = useDispatch();
 
@@ -45,20 +42,11 @@ export default function Register({ closeModal, switchToSignIn }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if
-
-        (formData.password !== formData.confirmPassword) {
-            alert('Пароли не совпадают');
-            return;
-        }
-
         try {
-            const response = await fetch('/api/users', {
+            const response = await fetch('/api/signin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    name: formData.name,
-                    surname: formData.surname,
                     phone: formData.phone,
                     password: formData.password,
                 }),
@@ -66,48 +54,26 @@ export default function Register({ closeModal, switchToSignIn }) {
 
             const data = await response.json();
             if (response.ok) {
-                dispatch(login(data)); // Сохраняем данные пользователя
+                dispatch(login(data.user)); // Передаём данные пользователя в Redux
                 closeModal();
-                alert('Регистрация успешна!');
+                alert('Вход успешен!');
             } else {
-                alert(data.message || 'Ошибка регистрации');
+                alert(data.message || 'Ошибка входа');
             }
         } catch (error) {
             console.error('Ошибка:', error);
-            alert('Произошла ошибка при регистрации');
+            alert('Произошла ошибка при входе');
         }
     };
 
     const isFormValid = () => {
-        return (
-            formData.name.trim() &&
-            formData.surname.trim() &&
-            formData.phone.length === 18 &&
-            formData.password.trim() &&
-            formData.confirmPassword.trim()
-        );
+        return formData.phone.length === 18 && formData.password.trim();
     };
 
     return (
         <div className="register-cont">
-            <div className="register-header">РЕГИСТРАЦИЯ</div>
+            <div className="register-header">ВОЙТИ</div>
             <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    name="name"
-                    placeholder="имя"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                />
-                <input
-                    type="text"
-                    name="surname"
-                    placeholder="фамилия"
-                    value={formData.surname}
-                    onChange={handleChange}
-                    required
-                />
                 <input
                     type="tel"
                     name="phone"
@@ -124,22 +90,14 @@ export default function Register({ closeModal, switchToSignIn }) {
                     onChange={handleChange}
                     required
                 />
-                <input
-                    type="password"
-                    name="confirmPassword"
-                    placeholder="повторите пароль"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    required
-                />
                 <div className="button-cont">
                     <button type="submit" className="submit-btn" disabled={!isFormValid()}>
-                        зарегистрироваться
+                        войти
                     </button>
                 </div>
                 <div className="enter-btn-cont">
-                    <div className="enter-btn" onClick={switchToSignIn}>
-                        войти
+                    <div className="enter-btn" onClick={switchToRegister}>
+                        зарегистрироваться
                     </div>
                 </div>
             </form>

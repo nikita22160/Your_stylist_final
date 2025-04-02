@@ -8,6 +8,13 @@
 }
 
 @font-face {
+  font-family: "SF-Pro-Display-Thin";
+  src: local("SF-Pro-Display-Thin"),
+  url("../public/fonts/SF-Pro-Display-Thin.otf") format("truetype");
+  font-weight: normal;
+}
+
+@font-face {
   font-family: "Lepka";
   src: local("Lepka"), url("../public/fonts/LEPKA.otf") format("truetype");
   font-weight: normal;
@@ -33,6 +40,15 @@
   scale: 1.01;
 }
 
+.user-name {
+  font-family: "SF-Pro-Display-Thin", sans-serif;
+  font-size: 32px;
+}
+
+.user-logo-cont {
+  transition: 0.3s;
+}
+
 @media screen and (min-width: 700px) {
   h1 {
     font-family: "Lepka", sans-serif;
@@ -41,8 +57,7 @@
     color: transparent;
     -webkit-text-stroke: 0.01px black;
   }
-
-  .user-logo-cont {
+  .user-cont {
     position: absolute;
     right: 70px;
     top: 30px;
@@ -58,21 +73,21 @@
     -webkit-text-stroke: 0.01px black;
   }
 
-  .user-logo-cont {
+  .user-cont {
     position: absolute;
     right: 20px;
     top: 30px;
   }
 }
 
-.register-cont {
-  background-color: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(20px);
-  border-radius: 15px;
-  width: 30vw;
-  min-width: 250px;
-  max-width: 350px;
-  padding: 50px;
+.user-cont {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-logo-cont:hover {
+  scale: 1.1;
 }
 
 /* Стили для модального окна */
@@ -101,44 +116,59 @@
   position: relative; /* Для позиционирования кнопки закрытия */
 }
 
-/* Стили для формы регистрации */
 .register-cont {
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.register-cont form {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-.register-cont div {
-  margin: 10px 0 5px;
-  font-weight: bold;
+  background-color: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(20px);
+  border-radius: 15px;
+  width: 30vw;
+  min-width: 250px;
+  max-width: 350px;
+  padding: 20px 40px;
+  font-family: SF-Pro-Display-Thin, sans-serif;
+  box-shadow: 0 4px 15px 4px rgba(0, 0, 0, 0.25);
 }
 
 .register-cont input {
+  background: transparent;
   padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: none;
+  border-bottom: 1px solid black;
   width: 100%;
   box-sizing: border-box;
+  font-family: SF-Pro-Display-Thin, sans-serif;
+  font-size: 24px;
+}
+
+.register-cont input:focus {
+  outline: none;
+}
+
+.button-cont {
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 
 .submit-btn {
-  margin-top: 15px;
-  padding: 10px;
-  background: #007bff;
-  color: white;
+  padding: 5px 10px;
+  background: rgba(255, 255, 255, 0.7);
+  color: black;
   border: none;
-  border-radius: 4px;
+  border-radius: 15px;
   cursor: pointer;
+  font-family: SF-Pro-Display-Thin, sans-serif;
+  font-size: 24px;
+  transition: 0.3s;
+  line-height: 100%;
+  text-align: center;
 }
 
 .submit-btn:hover {
-  background: #0056b3;
+  background: rgba(255, 255, 255, 1);
 }
 
 .close-btn {
@@ -176,4 +206,26 @@
     transform: translateY(0);
     opacity: 1;
   }
+}
+
+.register-header {
+  font-family: SF-Pro-Display-Thin, sans-serif;
+  font-size: 40px;
+  margin-bottom: 40px;
+}
+
+.enter-btn-cont {
+  display: flex;
+  justify-content: center;
+}
+
+.enter-btn {
+  color: white;
+  font-size: 32px;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.enter-btn:hover {
+  color: black;
 }
