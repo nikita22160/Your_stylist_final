@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import Register from '../components/Register.jsx';
 import SignIn from '../components/SignIn.jsx';
+import { useNavigate } from 'react-router-dom';
 
 export default function MainPage() {
     const [modalType, setModalType] = useState(null);
     const [stylists, setStylists] = useState([]);
     const { isAuthenticated, user } = useSelector((state) => state.auth);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchStylists = async () => {
@@ -42,8 +44,8 @@ export default function MainPage() {
         setModalType('signin');
     };
 
-    // Дублируем стилистов для бесконечной галереи (3 копии)
-    const cards = [...stylists, ...stylists, ...stylists].map((stylist, index) => (
+    // Дублируем стилистов для бесконечной галереи (4 копии)
+    const cards = [...stylists, ...stylists, ...stylists, ...stylists].map((stylist, index) => (
         <div className="card" key={index}>
             <img
                 src={stylist.photoLink}
@@ -60,9 +62,7 @@ export default function MainPage() {
                 <img src="/img/192.png" alt="Background" />
             </div>
             <div className="user-cont">
-                {isAuthenticated && user?.name && (
-                    <div className="user-name">{user.name}</div>
-                )}
+                {isAuthenticated && user?.name && <div className="user-name">{user.name}</div>}
                 <div className="user-logo-cont" onClick={handleUserIconClick}>
                     <img src="/img/User_Circle.svg" alt="User Icon" style={{ cursor: 'pointer' }} />
                 </div>
@@ -70,7 +70,7 @@ export default function MainPage() {
 
             <h1>ТВОЙ СТИЛИСТ</h1>
 
-            <div className="find-btn-cont">
+            <div className="find-btn-cont" onClick={() => navigate('/catalog')}>
                 <div className="find-btn">найти</div>
                 <img src="/img/Arrow.svg" />
             </div>

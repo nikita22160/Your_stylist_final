@@ -5,6 +5,7 @@
   -moz-user-select: none;  /* Firefox */
   -ms-user-select: none;  /* IE/Edge */
   user-select: none;  /* Стандартный синтаксис */
+  scrollbar-width: none;
 }
 
 @font-face {
@@ -25,7 +26,7 @@
   position: relative;
   height: calc(100vh - 60px);
   padding: 30px 70px;
-  background: linear-gradient(53.661deg, rgba(255, 255, 255, 0%) 0%, rgba(252, 224, 255, 10%) 50%), linear-gradient(-122.244deg, #FFFFFF 0%, rgba(252, 224, 255, 5%) 100%);
+  background: linear-gradient(53.661deg, rgba(255, 255, 255, 0%) 0%, rgba(252, 224, 255, 30%) 50%), linear-gradient(-122.244deg, #FFFFFF 0%, rgba(252, 224, 255, 10%) 100%);
 }
 
 .bg-img {
@@ -56,7 +57,7 @@ h1 {
 
 @media screen and (min-width: 700px) {
   h1 {
-    font-family: "Lepka", sans-serif;
+    font-family: 'Lepka', sans-serif;
     font-size: 128px;
     margin-top: 100px;
     color: transparent;
@@ -67,11 +68,6 @@ h1 {
     right: 70px;
     top: 30px;
   }
-
-  .gallery {
-    bottom: 150%;
-  }
-
   .bg-img {
     width: 800px;
   }
@@ -79,23 +75,17 @@ h1 {
 
 @media screen and (min-width: 300px) and (max-width: 700px) {
   h1 {
-    font-family: "Lepka", sans-serif;
+    font-family: 'Lepka', sans-serif;
     font-size: 64px;
     margin-top: 100px;
     color: transparent;
     -webkit-text-stroke: 0.01px black;
   }
-
   .user-cont {
     position: absolute;
     right: 20px;
     top: 30px;
   }
-
-  .gallery {
-    bottom: 100%;
-  }
-
   .bg-img {
     width: 500px;
   }
@@ -278,8 +268,10 @@ h1 {
   display: flex;
   gap: 10px;
   rotate: -25deg;
-  left: -100px; /* Начинаем с левого края */
-  width: max-content; /* Чтобы ширина соответствовала контенту */
+  top: -120%; /* Фиксируем вертикальное положение относительно экрана */
+  left: 0; /* Начинаем с левого края */
+  width: max-content; /* Ширина определяется содержимым */
+  transform: translateY(-70%); /* Используем твой сдвиг -70% как базовый */
   animation: scrollRight 100s infinite linear; /* Бесконечная анимация вправо */
 }
 
@@ -293,9 +285,193 @@ h1 {
 
 @keyframes scrollRight {
   0% {
-    transform: translateX(0); /* Начало с текущей позиции */
+    transform: translateX(-10%) translateY(-70%); /* Начальная позиция с учётом центрирования */
   }
   100% {
-    transform: translateX(-50%); /* Сдвиг на половину ширины галереи */
+    transform: translateX(-75%) translateY(-70%); /* Сдвиг на 2/3 ширины галереи */
+  }
+}
+
+.catalog-header {
+  font-size: 32px;
+  font-family: "Lepka", sans-serif;
+  scale: 1;
+  transition: 0.5s;
+  display: flex;
+}
+
+.catalog-header:hover {
+  cursor: pointer;
+  scale: 1.01;
+}
+
+/* Стили для фильтра */
+.filter-cont {
+  margin-top: 50px;
+}
+
+.filter-cont select {
+  padding: 8px 16px;
+  font-family: 'SF-Pro-Display-Thin', sans-serif;
+  font-size: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.filter-cont select:focus {
+  outline: none;
+  border-color: #000;
+}
+
+/* Стили для карточек стилистов */
+.cards-cont {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 30px;
+  gap: 20px;
+  overflow-y: scroll;
+  height: 70%;
+}
+
+.stylist-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px dashed darkgray;
+  border-radius: 15px;
+  padding: 5px;
+  height: fit-content;
+}
+
+.stylist-name {
+  font-family: 'SF-Pro-Display-Thin', sans-serif;
+  font-size: 20px;
+  margin-top: 10px;
+  margin-bottom: 0;
+  text-align: center;
+}
+
+@media screen and (max-width: 600px) {
+  .cards-cont{
+    justify-content: center;
+  }
+
+  .filter-cont {
+    display: flex;
+    justify-content: center;
+  }
+}
+
+.user-logo-cont-catalog {
+  width: 70px;
+  height: 70px;
+  cursor: pointer;
+}
+
+.user-cont-catalog {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 10px;
+}
+
+.stylist-profile {
+  display: flex;
+  flex-direction: row;
+  gap: 40px;
+  padding: 40px;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.stylist-info {
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.stylist-profile-img {
+  width: 200px;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.stylist-info h2 {
+  font-family: 'SF-Pro-Display-Thin', sans-serif;
+  font-size: 32px;
+  margin: 0;
+}
+
+.stylist-info p {
+  font-family: 'SF-Pro-Display-Thin', sans-serif;
+  font-size: 18px;
+  margin: 5px 0;
+}
+
+.chat-link {
+  font-family: 'SF-Pro-Display-Thin', sans-serif;
+  font-size: 18px;
+  color: #007bff;
+  text-decoration: none;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.chat-link:hover {
+  background: rgba(255, 255, 255, 1);
+  color: #0056b3;
+}
+
+.stylist-calendar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.stylist-calendar h3 {
+  font-family: 'SF-Pro-Display-Thin', sans-serif;
+  font-size: 24px;
+  margin: 0;
+}
+
+/* Кастомизация стилей календаря */
+.react-calendar {
+  font-family: 'SF-Pro-Display-Thin', sans-serif;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.react-calendar__tile--active {
+  background: #007bff;
+  color: white;
+}
+
+.react-calendar__tile--active:enabled:hover {
+  background: #0056b3;
+}
+
+@media screen and (max-width: 700px) {
+  .stylist-profile {
+    flex-direction: column;
+    padding: 20px;
+    align-items: center;
+  }
+
+  .stylist-info {
+    max-width: 100%;
+    align-items: center;
+    text-align: center;
   }
 }
