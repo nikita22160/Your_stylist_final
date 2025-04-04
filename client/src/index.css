@@ -476,3 +476,30 @@ h1 {
   }
 }
 
+.back-btn {
+  position: absolute;
+  top: 30px;
+  left: 70px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.7);
+  border: none;
+  border-radius: 10px;
+  font-family: 'SF-Pro-Display-Thin', sans-serif;
+  font-size: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+@media screen and (max-width: 700px) {
+  .back-btn {
+    top: 20px;
+    left: 20px;
+    font-size: 18px;
+    padding: 6px 12px;
+  }
+}

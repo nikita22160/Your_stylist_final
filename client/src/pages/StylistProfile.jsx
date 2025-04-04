@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css'; // Импортируем базовые стили календаря
+import 'react-calendar/dist/Calendar.css';
 
 export default function StylistProfile() {
     const { id } = useParams(); // Получаем ID стилиста из URL
     const [stylist, setStylist] = useState(null);
     const [selectedDate, setSelectedDate] = useState(new Date());
+    const navigate = useNavigate(); // Добавляем хук для навигации
 
     useEffect(() => {
         const fetchStylist = async () => {
@@ -26,12 +27,19 @@ export default function StylistProfile() {
         console.log('Выбранная дата:', date); // Здесь можно добавить логику записи
     };
 
+    const handleBackToCatalog = () => {
+        navigate('/catalog'); // Переход назад в каталог
+    };
+
     if (!stylist) {
         return <div className="main-container">Загрузка...</div>;
     }
 
     return (
         <div className="main-container">
+            <button className="back-btn" onClick={handleBackToCatalog}>
+                Назад в каталог
+            </button>
             <div className="stylist-profile">
                 <div className="stylist-info">
                     <img
@@ -48,11 +56,11 @@ export default function StylistProfile() {
                     </a>
                 </div>
                 <div className="stylist-calendar">
-                    <h3>ЗАПИСАТЬСЯ</h3>
+                    <h3>Запись на консультацию</h3>
                     <Calendar
                         onChange={handleDateChange}
                         value={selectedDate}
-                        minDate={new Date()} // Ограничение на будущие даты
+                        minDate={new Date()}
                     />
                 </div>
             </div>
