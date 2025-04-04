@@ -1,15 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 
 export default function StylistsCatalog() {
     const [stylists, setStylists] = useState([]);
     const [selectedCity, setSelectedCity] = useState('');
     const { isAuthenticated, user } = useSelector((state) => state.auth);
-
     const navigate = useNavigate();
 
-    // Загрузка стилистов
     useEffect(() => {
         const fetchStylists = async () => {
             try {
@@ -24,30 +22,25 @@ export default function StylistsCatalog() {
         fetchStylists();
     }, []);
 
-    // Функция для форматирования названия города
     const formatCityName = (city) => {
         const normalizedCity = city.toLowerCase().trim();
-        // Специальный случай для Санкт-Петербурга
         if (normalizedCity === 'санкт-петербург' || normalizedCity === 'санкт петербург') {
             return 'Санкт-Петербург';
         }
-        // Общая логика для остальных городов
         return city
-            .split(/(\s+)/) // Разделяем по пробелам, сохраняя их
+            .split(/(\s+)/)
             .map((part) => {
-                if (part.trim() === '') return part; // Пропускаем пробелы
+                if (part.trim() === '') return part;
                 return part
-                    .split('-') // Разделяем по дефису
-                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Каждое слово с большой буквы
-                    .join('-'); // Соединяем обратно с дефисом
+                    .split('-')
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join('-');
             })
-            .join(''); // Соединяем без дополнительных пробелов
+            .join('');
     };
 
-    // Извлечение уникальных городов
     const getUniqueCities = () => {
         const cityMap = new Map();
-
         stylists
             .filter((stylist) => stylist.city)
             .flatMap((stylist) => stylist.city.split(/,\s*|\s+/))
@@ -57,13 +50,11 @@ export default function StylistsCatalog() {
                 const formattedCity = formatCityName(city);
                 cityMap.set(normalizedCity, formattedCity);
             });
-
         return Array.from(cityMap.values());
     };
 
     const uniqueCities = getUniqueCities();
 
-    // Фильтрация стилистов по выбранному городу
     const filteredStylists = selectedCity
         ? stylists.filter(
             (stylist) =>
@@ -76,19 +67,22 @@ export default function StylistsCatalog() {
         setSelectedCity(e.target.value);
     };
 
+    const handleCardClick = (stylistId) => {
+        navigate(`/stylist/${stylistId}`); // Переход на страницу профиля
+    };
+
     return (
         <div className="main-container">
-            <div>
-                <div className="catalog-header" onClick={() => navigate('/')}>ТВОЙ СТИЛИСТ</div>
-                <div className="user-cont-catalog">
-                    {isAuthenticated && user?.name && (
-                        <div className="user-name">{user.name}</div>
-                    )}
-                    <div className="user-logo-cont-catalog">
-                        <img src="/img/User_Circle.svg" alt="User Icon" width='100%' height='100%' />
-                    </div>
+            <div className="user-cont">
+                {isAuthenticated && user?.name && (
+                    <div className="user-name">{user.name}</div>
+                )}
+                <div className="user-logo-cont">
+                    <img src="/img/User_Circle.svg" alt="User Icon" style={{ cursor: 'pointer' }} />
                 </div>
             </div>
+
+            <div className="catalog-header">ТВОЙ СТИЛИСТ</div>
 
             <div className="filter-cont">
                 <select value={selectedCity} onChange={handleCityChange}>
@@ -103,7 +97,12 @@ export default function StylistsCatalog() {
 
             <div className="cards-cont">
                 {filteredStylists.map((stylist) => (
-                    <div className="stylist-card" key={stylist._id}>
+                    <div
+                        className="stylist-card"
+                        key={stylist._id}
+                        onClick={() => handleCardClick(stylist._id)} // Обработчик клика
+                        style={{ cursor: 'pointer' }} // Указываем, что карточка кликабельна
+                    >
                         <img
                             src={stylist.photoLink}
                             alt={`${stylist.name} ${stylist.surname}`}
