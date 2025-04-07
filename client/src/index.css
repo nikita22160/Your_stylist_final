@@ -25,8 +25,19 @@
   overflow: hidden;
   position: relative;
   height: calc(100vh - 60px);
-  padding: 30px 70px;
+  padding: 30px 50px;
   background: linear-gradient(53.661deg, rgba(255, 255, 255, 0%) 0%, rgba(252, 224, 255, 30%) 50%), linear-gradient(-122.244deg, #FFFFFF 0%, rgba(252, 224, 255, 10%) 100%);
+  overflow-x: visible;
+}
+
+@media screen and (max-width: 600px){
+  .main-container {
+    overflow: hidden;
+    position: relative;
+    height: calc(100vh - 60px);
+    padding: 30px 10px;
+    background: linear-gradient(53.661deg, rgba(255, 255, 255, 0%) 0%, rgba(252, 224, 255, 30%) 50%), linear-gradient(-122.244deg, #FFFFFF 0%, rgba(252, 224, 255, 10%) 100%);
+  }
 }
 
 .bg-img {
@@ -298,6 +309,7 @@ h1 {
   scale: 1;
   transition: 0.5s;
   display: flex;
+  width: fit-content;
 }
 
 .catalog-header:hover {
@@ -313,7 +325,7 @@ h1 {
 .filter-cont select {
   padding: 8px 16px;
   font-family: 'SF-Pro-Display-Thin', sans-serif;
-  font-size: 20px;
+  font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 10px;
   background: transparent;
@@ -377,129 +389,233 @@ h1 {
   gap: 10px;
 }
 
-.stylist-profile {
-  display: flex;
-  flex-direction: row;
-  gap: 40px;
-  padding: 40px;
-  justify-content: center;
-  align-items: flex-start;
-  flex-wrap: wrap;
+.stylist-info-cont {
+  margin-top: 40px;
+  height: 90%;
+  width: 100%;
+  overflow-y: scroll;
 }
 
-.stylist-info {
-  max-width: 400px;
+.stylist-main-info {
   display: flex;
-  flex-direction: column;
-  gap: 15px;
+  gap: 10px;
 }
 
-.stylist-profile-img {
+.stylist-photo-name {
+  padding: 5px;
+  border: 1px dashed darkgray;
+  border-radius: 15px;
+  width: fit-content;
+  height: fit-content;
+}
+
+.stylist-photo {
   width: 200px;
-  height: 250px;
+  height: 200px;
+  border-radius: 10px;
+  overflow: hidden;
+  object-fit: fill;
+}
+
+.stylist-photo img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: 10px;
 }
 
-.stylist-info h2 {
-  font-family: 'SF-Pro-Display-Thin', sans-serif;
-  font-size: 32px;
-  margin: 0;
-}
-
-.stylist-info p {
-  font-family: 'SF-Pro-Display-Thin', sans-serif;
-  font-size: 18px;
-  margin: 5px 0;
-}
-
-.chat-link {
-  font-family: 'SF-Pro-Display-Thin', sans-serif;
-  font-size: 18px;
-  color: #007bff;
-  text-decoration: none;
+.stylist-description {
   padding: 10px;
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: 10px;
-  text-align: center;
-  transition: 0.3s;
+  border-radius: 15px;
+  border: 1px dashed darkgray;
+  height: fit-content;
 }
 
-.chat-link:hover {
-  background: rgba(255, 255, 255, 1);
-  color: #0056b3;
+.stylist-description h2 {
+  font-family: SF-Pro-Display-Thin, sans-serif;
+  font-size: 20px;
+  font-weight: 600;
 }
 
-.stylist-calendar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
+.stylist-description p {
+  font-family: SF-Pro-Display-Thin, sans-serif;
+  font-size: 16px;
+  margin-top: 15px;
 }
 
-.stylist-calendar h3 {
-  font-family: 'SF-Pro-Display-Thin', sans-serif;
-  font-size: 24px;
-  margin: 0;
-}
-
-/* Кастомизация стилей календаря */
-.react-calendar {
-  font-family: 'SF-Pro-Display-Thin', sans-serif;
-  border: none;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.7);
-  padding: 10px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.react-calendar__tile--active {
-  background: #007bff;
-  color: white;
-}
-
-.react-calendar__tile--active:enabled:hover {
-  background: #0056b3;
-}
-
-@media screen and (max-width: 700px) {
-  .stylist-profile {
-    flex-direction: column;
-    padding: 20px;
-    align-items: center;
+@media screen and (max-width: 840px) {
+  .stylist-main-info {
+    display: block;
   }
 
-  .stylist-info {
-    max-width: 100%;
-    align-items: center;
-    text-align: center;
+  .stylist-description {
+    margin-top: 10px;
+  }
+
+  .stylist-photo-name {
+    margin: 0 auto;
   }
 }
 
 .back-btn {
-  position: absolute;
-  top: 30px;
-  left: 70px;
-  padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.7);
-  border: none;
-  border-radius: 10px;
-  font-family: 'SF-Pro-Display-Thin', sans-serif;
-  font-size: 20px;
   cursor: pointer;
+  width: fit-content;
   transition: 0.3s;
 }
 
 .back-btn:hover {
-  background: rgba(255, 255, 255, 1);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  scale: 1.1;
 }
 
-@media screen and (max-width: 700px) {
-  .back-btn {
-    top: 20px;
-    left: 20px;
-    font-size: 18px;
-    padding: 6px 12px;
-  }
+.contact-btn {
+  font-family: SF-Pro-Display-Thin, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  align-items: center;
+  cursor: pointer;
+  background: white;
+  box-shadow: 4px 4px 10px 0 rgba(0, 0, 0, 0.1);
+  transition: 0.3s;
+}
+
+.contact-btn:hover {
+  font-size: 18px;
+}
+
+.appointment {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 15px;
+  border: 1px dashed darkgray;
+}
+
+.appointment-calendar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 60px;
+  justify-content: center;
+}
+
+.appointment h2 {
+  font-family: SF-Pro-Display-Thin, sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.stylist-page-header {
+  position: absolute;
+  width: fit-content;
+  top: 30px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  font-family: "Lepka", sans-serif;
+  font-size: 32px;
+  color: transparent;
+  -webkit-text-stroke: 1px black;
+}
+
+.react-calendar {
+  background: rgba(255, 255, 255, 0.3) !important;
+  font-family: SF-Pro-Display-Thin, sans-serif !important;
+  border-radius: 15px;
+  width: 200px;
+}
+
+.react-calendar__navigation__label__labelText .react-calendar__navigation__label__labelText--from {
+  font-family: SF-Pro-Display-Thin, sans-serif !important;
+}
+
+.react-calendar__navigation__arrow .react-calendar__navigation__next2-button {
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.react-calendar__navigation {
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  overflow: hidden;
+}
+
+.react-calendar__viewContainer {
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+  overflow: hidden;
+}
+
+.city-stylist {
+  padding: 10px;
+  border-radius: 15px;
+  border: 1px dashed darkgray;
+  margin-top: 10px;
+  font-family: SF-Pro-Display-Thin, sans-serif;
+}
+
+.city-stylist h2 {
+  font-size: 16px;
+}
+
+.time-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  overflow-x: visible;
+  width: 200px !important;
+}
+
+.time-selection h3 {
+  font-family: 'SF-Pro-Display-Thin', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.time-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 280px; /* Ограничим высоту для прокрутки, если нужно */
+  overflow: auto;
+  width: 200px;
+}
+
+.time-slot {
+  padding: 8px 12px;
+  border: 1px dashed darkgray;
+  border-radius: 10px;
+  font-family: 'SF-Pro-Display-Thin', sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.3);
+  transition: 0.3s;
+  text-align: center;
+  overflow-x: visible;
+}
+
+.time-slot:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.time-slot.selected {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid darkgray;
+  font-weight: 600;
+}
+
+.name-find {
+  border: none;
+  outline: none;
+  background: transparent;
+  border-bottom: 1px solid darkgray;
+  padding: 5px 0;
+  font-size: 16px;
+  margin-left: 20px;
+  line-height: 120%;
+  font-family: SF-Pro-Display-Thin, sans-serif;
 }

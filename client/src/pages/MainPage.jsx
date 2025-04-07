@@ -64,7 +64,7 @@ export default function MainPage() {
             <div className="user-cont">
                 {isAuthenticated && user?.name && <div className="user-name">{user.name}</div>}
                 <div className="user-logo-cont" onClick={handleUserIconClick}>
-                    <img src="/img/User_Circle.svg" alt="User Icon" style={{ cursor: 'pointer' }} />
+                    <img src="/img/User_Circle.svg" alt="User Icon" style={{ cursor: 'pointer' }} width={50} height={50}/>
                 </div>
             </div>
 

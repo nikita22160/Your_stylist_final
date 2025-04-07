@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 export default function StylistsCatalog() {
     const [stylists, setStylists] = useState([]);
     const [selectedCity, setSelectedCity] = useState('');
+    const [searchName, setSearchName] = useState(''); // Состояние для поиска по имени
     const { isAuthenticated, user } = useSelector((state) => state.auth);
     const navigate = useNavigate();
 
@@ -55,34 +56,49 @@ export default function StylistsCatalog() {
 
     const uniqueCities = getUniqueCities();
 
-    const filteredStylists = selectedCity
-        ? stylists.filter(
-            (stylist) =>
-                stylist.city &&
-                stylist.city.toLowerCase().includes(selectedCity.toLowerCase())
-        )
-        : stylists;
+    // Фильтрация по городу и имени
+    const filteredStylists = stylists.filter((stylist) => {
+        const matchesCity =
+            !selectedCity ||
+            (stylist.city && stylist.city.toLowerCase().includes(selectedCity.toLowerCase()));
+        const matchesName =
+            !searchName ||
+            `${stylist.name} ${stylist.surname}`
+                .toLowerCase()
+                .includes(searchName.toLowerCase().trim());
+        return matchesCity && matchesName;
+    });
 
     const handleCityChange = (e) => {
         setSelectedCity(e.target.value);
     };
 
+    const handleNameChange = (e) => {
+        setSearchName(e.target.value); // Обновляем значение поиска
+    };
+
     const handleCardClick = (stylistId) => {
-        navigate(`/stylist/${stylistId}`); // Переход на страницу профиля
+        navigate(`/stylist/${stylistId}`);
     };
 
     return (
         <div className="main-container">
             <div className="user-cont">
-                {isAuthenticated && user?.name && (
-                    <div className="user-name">{user.name}</div>
-                )}
+                {isAuthenticated && user?.name && <div className="user-name">{user.name}</div>}
                 <div className="user-logo-cont">
-                    <img src="/img/User_Circle.svg" alt="User Icon" style={{ cursor: 'pointer' }} />
+                    <img
+                        src="/img/User_Circle.svg"
+                        alt="User Icon"
+                        style={{ cursor: 'pointer' }}
+                        width={50}
+                        height={50}
+                    />
                 </div>
             </div>
 
-            <div className="catalog-header">ТВОЙ СТИЛИСТ</div>
+            <div className="catalog-header" onClick={() => navigate('/')}>
+                ТВОЙ СТИЛИСТ
+            </div>
 
             <div className="filter-cont">
                 <select value={selectedCity} onChange={handleCityChange}>
@@ -93,6 +109,12 @@ export default function StylistsCatalog() {
                         </option>
                     ))}
                 </select>
+                <input
+                    className="name-find"
+                    placeholder="Введите имя"
+                    value={searchName}
+                    onChange={handleNameChange}
+                />
             </div>
 
             <div className="cards-cont">
@@ -100,8 +122,8 @@ export default function StylistsCatalog() {
                     <div
                         className="stylist-card"
                         key={stylist._id}
-                        onClick={() => handleCardClick(stylist._id)} // Обработчик клика
-                        style={{ cursor: 'pointer' }} // Указываем, что карточка кликабельна
+                        onClick={() => handleCardClick(stylist._id)}
+                        style={{ cursor: 'pointer' }}
                     >
                         <img
                             src={stylist.photoLink}
