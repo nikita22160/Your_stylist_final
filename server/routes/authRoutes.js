@@ -11,12 +11,13 @@ router.post('/signin', async (req, res) => {
             return res.status(400).json({ message: 'Пользователь с таким номером телефона не найден' });
         }
 
-        // Простая проверка пароля (в реальном проекте используй bcrypt для хеширования)
+        // Простая проверка пароля (в реальном проекте используй bcrypt)
         if (user.password !== password) {
             return res.status(400).json({ message: 'Неверный пароль' });
         }
 
-        res.json({ user: { name: user.name, surname: user.surname, phone: user.phone } });
+        // Возвращаем полный объект пользователя, включая _id
+        res.json({ user: { _id: user._id, name: user.name, surname: user.surname, phone: user.phone } });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

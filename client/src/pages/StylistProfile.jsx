@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 
 export default function StylistProfile() {
     const { id } = useParams();
     const [stylist, setStylist] = useState(null);
-    const [selectedDate, setSelectedDate] = useState(null); // null до выбора даты
-    const [selectedTime, setSelectedTime] = useState(null); // Выбранный час
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [selectedTime, setSelectedTime] = useState(null);
+    const [appointments, setAppointments] = useState([]);
     const navigate = useNavigate();
+    const { user, isAuthenticated } = useSelector((state) => state.auth);
 
     useEffect(() => {
         const fetchStylist = async () => {
@@ -20,12 +23,24 @@ export default function StylistProfile() {
                 console.error('Ошибка загрузки стилиста:', error);
             }
         };
+
+        const fetchAppointments = async () => {
+            try {
+                const response = await fetch(`/api/stylists/${id}/appointments`);
+                const data = await response.json();
+                setAppointments(data);
+            } catch (error) {
+                console.error('Ошибка загрузки записей:', error);
+            }
+        };
+
         fetchStylist();
+        fetchAppointments();
     }, [id]);
 
     const handleDateChange = (date) => {
         setSelectedDate(date);
-        setSelectedTime(null); // Сбрасываем выбор часа при смене даты
+        setSelectedTime(null);
         console.log('Выбранная дата:', date);
     };
 
@@ -38,11 +53,67 @@ export default function StylistProfile() {
         navigate('/catalog');
     };
 
-    // Генерация списка часов (10:00–19:00)
+    const handleBookAppointment = async () => {
+        if (!isAuthenticated || !user || !user._id) {
+            alert('Пожалуйста, войдите в систему для записи');
+            navigate('/'); // Перенаправляем на главную страницу для входа
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/stylists/${id}/appointments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: user._id,
+                    date: selectedDate,
+                    time: selectedTime,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message);
+            }
+
+            const newAppointment = await response.json();
+            setAppointments([...appointments, newAppointment]);
+            alert('Запись успешно создана!');
+            setSelectedDate(null);
+            setSelectedTime(null);
+        } catch (error) {
+            alert(`Ошибка при записи: ${error.message}`);
+        }
+    };
+
     const availableHours = Array.from({ length: 10 }, (_, i) => {
         const hour = 10 + i;
         return `${hour}:00`;
     });
+
+    const isDateDisabled = ({ date }) => {
+        const normalizedDate = new Date(date).setHours(0, 0, 0, 0);
+        return appointments.some(
+            (appt) =>
+                new Date(appt.date).setHours(0, 0, 0, 0) === normalizedDate &&
+                availableHours.every((time) =>
+                    appointments.some(
+                        (a) => a.time === time && new Date(a.date).setHours(0, 0, 0, 0) === normalizedDate
+                    )
+                )
+        );
+    };
+
+    const getAvailableHoursForDate = () => {
+        if (!selectedDate) return [];
+        const normalizedDate = new Date(selectedDate).setHours(0, 0, 0, 0);
+        const bookedTimes = appointments
+            .filter((appt) => new Date(appt.date).setHours(0, 0, 0, 0) === normalizedDate)
+            .map((appt) => appt.time);
+        return availableHours.filter((time) => !bookedTimes.includes(time));
+    };
+
+    const availableTimes = getAvailableHoursForDate();
 
     if (!stylist) {
         return <div className="main-container">Загрузка...</div>;
@@ -53,7 +124,9 @@ export default function StylistProfile() {
             <div onClick={handleBackToCatalog} className="back-btn">
                 <img src="/img/back.svg" alt="Назад" />
             </div>
-            <div className="stylist-page-header" onClick={() => navigate('/')}>ТВОЙ СТИЛИСТ</div>
+            <div className="stylist-page-header" onClick={() => navigate('/')}>
+                ТВОЙ СТИЛИСТ
+            </div>
             <div className="stylist-info-cont">
                 <div className="stylist-main-info">
                     <div>
@@ -80,21 +153,22 @@ export default function StylistProfile() {
                             <p>{stylist.description}</p>
                         </div>
                         <div className="appointment">
-                            <div className='appointment-calendar'>
+                            <div className="appointment-calendar">
                                 <div>
                                     <h2>Выберите дату</h2>
                                     <Calendar
                                         onChange={handleDateChange}
                                         value={selectedDate}
                                         minDate={new Date()}
+                                        tileDisabled={isDateDisabled}
                                     />
                                 </div>
-                                <div>
-                                    {selectedDate && (
-                                        <div className="time-selection">
-                                            <h3>Выберите время</h3>
-                                            <div className="time-list">
-                                                {availableHours.map((time) => (
+                                {selectedDate && (
+                                    <div className="time-selection">
+                                        <h3>Выберите время</h3>
+                                        <div className="time-list">
+                                            {availableTimes.length > 0 ? (
+                                                availableTimes.map((time) => (
                                                     <div
                                                         key={time}
                                                         className={`time-slot ${selectedTime === time ? 'selected' : ''}`}
@@ -102,13 +176,20 @@ export default function StylistProfile() {
                                                     >
                                                         {time}
                                                     </div>
-                                                ))}
-                                            </div>
+                                                ))
+                                            ) : (
+                                                <p>Нет доступных часов</p>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
+                                    </div>
+                                )}
                             </div>
-                            <div className="contact-btn">записаться</div>
+                            {selectedDate && selectedTime && <div
+                                className={`contact-btn book-btn ${selectedDate && selectedTime ? 'active' : ''}`}
+                                onClick={selectedDate && selectedTime ? handleBookAppointment : null}
+                            >
+                                записаться
+                            </div>}
                         </div>
                     </div>
                 </div>
