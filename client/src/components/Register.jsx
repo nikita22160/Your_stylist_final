@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { login } from '../redux/slices/authSlice.js';
+import { persistor } from '../redux/store';
 
+// Компонент для формы регистрации нового пользователя
 export default function Register({ closeModal, switchToSignIn }) {
     const [formData, setFormData] = useState({
         name: '',
@@ -12,19 +14,13 @@ export default function Register({ closeModal, switchToSignIn }) {
     });
     const dispatch = useDispatch();
 
+    // Форматирование номера телефона в формате +7 (XXX) XXX-XX-XX
     const formatPhoneNumber = (value) => {
         let digits = value.replace(/\D/g, '');
         if (!digits) return '';
-
-        if (digits.startsWith('8')) {
-            digits = '7' + digits.slice(1);
-        }
-        if (digits.startsWith('9')) {
-            digits = '7' + digits;
-        }
-
+        if (digits.startsWith('8')) digits = '7' + digits.slice(1);
+        if (digits.startsWith('9')) digits = '7' + digits;
         digits = digits.slice(0, 11);
-
         let formatted = '+7';
         if (digits.length > 1) formatted += ` (${digits.slice(1, 4)}`;
         if (digits.length > 4) formatted += `) ${digits.slice(4, 7)}`;
@@ -33,6 +29,7 @@ export default function Register({ closeModal, switchToSignIn }) {
         return formatted;
     };
 
+    // Обработка изменений в полях формы
     const handleChange = (e) => {
         const { name, value } = e.target;
         if (name === 'phone') {
@@ -43,11 +40,10 @@ export default function Register({ closeModal, switchToSignIn }) {
         }
     };
 
+    // Отправка данных на сервер и регистрация
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if
-
-        (formData.password !== formData.confirmPassword) {
+        if (formData.password !== formData.confirmPassword) {
             alert('Пароли не совпадают');
             return;
         }
@@ -66,18 +62,19 @@ export default function Register({ closeModal, switchToSignIn }) {
 
             const data = await response.json();
             if (response.ok) {
-                dispatch(login(data)); // Сохраняем данные пользователя
+                dispatch(login(data)); // Сохраняем данные пользователя в Redux
+                await persistor.flush(); // Убеждаемся, что состояние записано в localStorage
                 closeModal();
                 alert('Регистрация успешна!');
             } else {
                 alert(data.message || 'Ошибка регистрации');
             }
         } catch (error) {
-            console.error('Ошибка:', error);
             alert('Произошла ошибка при регистрации');
         }
     };
 
+    // Проверка валидности формы
     const isFormValid = () => {
         return (
             formData.name.trim() &&
