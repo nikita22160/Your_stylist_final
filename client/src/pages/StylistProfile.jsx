@@ -145,6 +145,12 @@ export default function StylistProfile() {
                         <div className="contact-btn" onClick={() => window.open(stylist.chatLink, '_blank')}>
                             связаться
                         </div>
+                        <div className="contact-btn" onClick={() => window.open(stylist.chatLink, '_blank')}>
+                            портфолио
+                        </div>
+                        <div className="contact-btn" onClick={() => window.open(stylist.chatLink, '_blank')}>
+                            цены
+                        </div>
                     </div>
 
                     <div>
