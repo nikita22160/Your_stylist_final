@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import SignIn from '../components/SignIn'; // Импортируем SignIn
+import ProfileModal from '../components/ProfileModal'; // Импортируем ProfileModal
 
 export default function StylistsCatalog() {
     const [stylists, setStylists] = useState([]);
     const [selectedCity, setSelectedCity] = useState('');
     const [searchName, setSearchName] = useState(''); // Состояние для поиска по имени
+    const [modalType, setModalType] = useState(null); // Состояние для модального окна
     const { isAuthenticated, user } = useSelector((state) => state.auth);
     const navigate = useNavigate();
 
@@ -14,7 +17,6 @@ export default function StylistsCatalog() {
             try {
                 const response = await fetch('/api/stylists');
                 const data = await response.json();
-                console.log('Загруженные стилисты:', data);
                 setStylists(data);
             } catch (error) {
                 console.error('Ошибка загрузки стилистов:', error);
@@ -74,18 +76,37 @@ export default function StylistsCatalog() {
     };
 
     const handleNameChange = (e) => {
-        setSearchName(e.target.value); // Обновляем значение поиска
+        setSearchName(e.target.value);
     };
 
     const handleCardClick = (stylistId) => {
         navigate(`/stylist/${stylistId}`);
     };
 
+    // Обработчик клика по иконке пользователя
+    const handleUserIconClick = () => {
+        if (!isAuthenticated) {
+            setModalType('signin');
+        } else {
+            setModalType('profile');
+        }
+    };
+
+    // Закрытие модального окна
+    const closeModal = () => {
+        setModalType(null);
+    };
+
+    // Переключение на регистрацию
+    const switchToRegister = () => {
+        setModalType('register');
+    };
+
     return (
         <div className="main-container">
             <div className="user-cont">
                 {isAuthenticated && user?.name && <div className="user-name">{user.name}</div>}
-                <div className="user-logo-cont">
+                <div className="user-logo-cont" onClick={handleUserIconClick}>
                     <img
                         src="/img/User_Circle.svg"
                         alt="User Icon"
@@ -134,6 +155,19 @@ export default function StylistsCatalog() {
                     </div>
                 ))}
             </div>
+
+            {/* Модальное окно */}
+            {modalType && (
+                <div className="modal-overlay" onClick={closeModal}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        {modalType === 'signin' ? (
+                            <SignIn closeModal={closeModal} switchToRegister={switchToRegister} />
+                        ) : (
+                            <ProfileModal closeModal={closeModal} />
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

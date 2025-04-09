@@ -631,7 +631,7 @@ h1 {
   border-bottom: 2px dashed rgba(255, 255, 255, 0.7);;
   font-family: 'SF-Pro-Display-Thin', sans-serif;
   margin-bottom: 15px;
-  font-size: 20px;
+  font-size: 24px;
 }
 
 .user-profile-block-head {
@@ -654,7 +654,7 @@ h1 {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-family: 'Arial', sans-serif; /* Замени на шрифт твоего сайта, если нужно */
+  font-family: 'SF-Pro-Display-Thin', sans-serif; /* Замени на шрифт твоего сайта, если нужно */
   font-size: 16px;
   font-weight: 500;
 }

@@ -63,5 +63,6 @@ export const ToastNotifications = () => (
         draggable // Возможность перетаскивать
         theme="light"
         transition={Slide} // Плавная анимация Slide
+        closeButton={false} // Отключаем крестик для закрытия
     />
 );
