@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { login } from '../redux/slices/authSlice.js';
 import { persistor } from '../redux/store';
+import { showSuccess, showError, showWarning } from './ToastNotifications';
 
 // Компонент для формы регистрации нового пользователя
 export default function Register({ closeModal, switchToSignIn }) {
@@ -14,7 +15,6 @@ export default function Register({ closeModal, switchToSignIn }) {
     });
     const dispatch = useDispatch();
 
-    // Форматирование номера телефона в формате +7 (XXX) XXX-XX-XX
     const formatPhoneNumber = (value) => {
         let digits = value.replace(/\D/g, '');
         if (!digits) return '';
@@ -29,7 +29,6 @@ export default function Register({ closeModal, switchToSignIn }) {
         return formatted;
     };
 
-    // Обработка изменений в полях формы
     const handleChange = (e) => {
         const { name, value } = e.target;
         if (name === 'phone') {
@@ -40,11 +39,10 @@ export default function Register({ closeModal, switchToSignIn }) {
         }
     };
 
-    // Отправка данных на сервер и регистрация
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (formData.password !== formData.confirmPassword) {
-            alert('Пароли не совпадают');
+            showWarning('Пароли не совпадают'); // Предупреждение
             return;
         }
 
@@ -62,19 +60,18 @@ export default function Register({ closeModal, switchToSignIn }) {
 
             const data = await response.json();
             if (response.ok) {
-                dispatch(login(data)); // Сохраняем данные пользователя в Redux
-                await persistor.flush(); // Убеждаемся, что состояние записано в localStorage
+                dispatch(login(data));
+                await persistor.flush();
                 closeModal();
-                alert('Регистрация успешна!');
+                showSuccess('Регистрация успешна!'); // Успешное уведомление
             } else {
-                alert(data.message || 'Ошибка регистрации');
+                showError(data.message || 'Ошибка регистрации'); // Ошибка
             }
         } catch (error) {
-            alert('Произошла ошибка при регистрации');
+            showError('Произошла ошибка при регистрации'); // Ошибка
         }
     };
 
-    // Проверка валидности формы
     const isFormValid = () => {
         return (
             formData.name.trim() &&

@@ -3,7 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import { showSuccess, showError, showWarning } from '../components/ToastNotifications';
 
+// Компонент профиля стилиста с возможностью записи
 export default function StylistProfile() {
     const { id } = useParams();
     const [stylist, setStylist] = useState(null);
@@ -20,7 +22,7 @@ export default function StylistProfile() {
                 const data = await response.json();
                 setStylist(data);
             } catch (error) {
-                console.error('Ошибка загрузки стилиста:', error);
+                showError('Ошибка загрузки стилиста');
             }
         };
 
@@ -30,7 +32,7 @@ export default function StylistProfile() {
                 const data = await response.json();
                 setAppointments(data);
             } catch (error) {
-                console.error('Ошибка загрузки записей:', error);
+                showError('Ошибка загрузки записей');
             }
         };
 
@@ -41,12 +43,10 @@ export default function StylistProfile() {
     const handleDateChange = (date) => {
         setSelectedDate(date);
         setSelectedTime(null);
-        console.log('Выбранная дата:', date);
     };
 
     const handleTimeChange = (time) => {
         setSelectedTime(time);
-        console.log('Выбранное время:', time);
     };
 
     const handleBackToCatalog = () => {
@@ -55,8 +55,8 @@ export default function StylistProfile() {
 
     const handleBookAppointment = async () => {
         if (!isAuthenticated || !user || !user._id) {
-            alert('Пожалуйста, войдите в систему для записи');
-            navigate('/'); // Перенаправляем на главную страницу для входа
+            showWarning('Пожалуйста, войдите в систему для записи');
+            navigate('/');
             return;
         }
 
@@ -78,11 +78,11 @@ export default function StylistProfile() {
 
             const newAppointment = await response.json();
             setAppointments([...appointments, newAppointment]);
-            alert('Запись успешно создана!');
+            showSuccess('Запись успешно создана!');
             setSelectedDate(null);
             setSelectedTime(null);
         } catch (error) {
-            alert(`Ошибка при записи: ${error.message}`);
+            showError(`Ошибка при записи: ${error.message}`);
         }
     };
 
@@ -152,7 +152,6 @@ export default function StylistProfile() {
                             цены
                         </div>
                     </div>
-
                     <div>
                         <div className="stylist-description">
                             <h2>Описание</h2>
@@ -190,12 +189,14 @@ export default function StylistProfile() {
                                     </div>
                                 )}
                             </div>
-                            {selectedDate && selectedTime && <div
-                                className={`contact-btn book-btn ${selectedDate && selectedTime ? 'active' : ''}`}
-                                onClick={selectedDate && selectedTime ? handleBookAppointment : null}
-                            >
-                                записаться
-                            </div>}
+                            {selectedDate && selectedTime && (
+                                <div
+                                    className={`contact-btn book-btn ${selectedDate && selectedTime ? 'active' : ''}`}
+                                    onClick={handleBookAppointment}
+                                >
+                                    записаться
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

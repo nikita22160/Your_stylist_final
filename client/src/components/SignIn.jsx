@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { login } from '../redux/slices/authSlice.js';
 import { persistor } from '../redux/store';
+import { showSuccess, showError } from './ToastNotifications';
 
 // Компонент для формы входа в систему
 export default function SignIn({ closeModal, switchToRegister }) {
@@ -11,7 +12,6 @@ export default function SignIn({ closeModal, switchToRegister }) {
     });
     const dispatch = useDispatch();
 
-    // Форматирование номера телефона в формате +7 (XXX) XXX-XX-XX
     const formatPhoneNumber = (value) => {
         let digits = value.replace(/\D/g, '');
         if (!digits) return '';
@@ -26,7 +26,6 @@ export default function SignIn({ closeModal, switchToRegister }) {
         return formatted;
     };
 
-    // Обработка изменений в полях формы
     const handleChange = (e) => {
         const { name, value } = e.target;
         if (name === 'phone') {
@@ -37,7 +36,6 @@ export default function SignIn({ closeModal, switchToRegister }) {
         }
     };
 
-    // Отправка данных на сервер и авторизация
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -52,19 +50,18 @@ export default function SignIn({ closeModal, switchToRegister }) {
 
             const data = await response.json();
             if (response.ok) {
-                dispatch(login(data.user)); // Сохраняем данные пользователя в Redux
-                await persistor.flush(); // Убеждаемся, что состояние записано в localStorage
+                dispatch(login(data.user));
+                await persistor.flush();
                 closeModal();
-                alert('Вход успешен!');
+                showSuccess('Вход успешен!');
             } else {
-                alert(data.message || 'Ошибка входа');
+                showError(data.message || 'Ошибка входа');
             }
         } catch (error) {
-            alert('Произошла ошибка при входе');
+            showError('Произошла ошибка при входе');
         }
     };
 
-    // Проверка валидности формы
     const isFormValid = () => {
         return formData.phone.length === 18 && formData.password.trim();
     };

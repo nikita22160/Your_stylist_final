@@ -532,7 +532,7 @@ h1 {
   background: rgba(255, 255, 255, 0.3) !important;
   font-family: SF-Pro-Display-Thin, sans-serif !important;
   border-radius: 15px;
-  width: 200px;
+  width: 250px;
 }
 
 .react-calendar__navigation__label__labelText .react-calendar__navigation__label__labelText--from {
@@ -647,4 +647,76 @@ h1 {
   margin-top: 20px;
   margin-bottom: 10px;
   cursor: pointer;
+}
+
+/* Контейнер для содержимого уведомления */
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Arial', sans-serif; /* Замени на шрифт твоего сайта, если нужно */
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Общие стили для всех уведомлений */
+.Toastify__toast {
+  border-radius: 12px; /* Более закругленные углы */
+  opacity: 0.9; /* Прозрачность */
+  padding: 10px 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out; /* Плавный переход для появления/исчезновения */
+}
+
+/* Стили для успешных уведомлений */
+.toast-success {
+  background-color: #e6f4ea; /* Светло-зелёный фон, как на скриншоте */
+  color: #155724;
+}
+
+/* Стили для ошибок */
+.toast-error {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Стили для предупреждений */
+.toast-warning {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+/* Переопределяем стандартные стили ToastContainer */
+.Toastify__toast-container {
+  width: 320px;
+  top: 20px; /* Отступ сверху */
+}
+
+/* Плавное появление и исчезновение */
+.Toastify__toast--enter {
+  transform: translateY(-100%);
+}
+
+.Toastify__toast--enter-active {
+  transform: translateY(0);
+  transition: transform 0.3s ease-in-out;
+}
+
+.Toastify__toast--exit {
+  transform: translateY(0);
+}
+
+.Toastify__toast--exit-active {
+  transform: translateY(-100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Стили для кнопки закрытия */
+.Toastify__close-button {
+  color: #666; /* Цвет крестика, как на скриншоте */
+  opacity: 0.7;
+}
+
+.Toastify__close-button:hover {
+  opacity: 1;
 }
