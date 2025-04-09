@@ -519,6 +519,13 @@ h1 {
   font-size: 32px;
   color: transparent;
   -webkit-text-stroke: 1px black;
+  cursor: pointer;
+  transition: 0.5s;
+}
+
+.stylist-page-header:hover {
+  -webkit-text-stroke: 0 transparent;
+  color: black;
 }
 
 .react-calendar {
