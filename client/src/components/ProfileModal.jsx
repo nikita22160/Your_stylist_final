@@ -17,20 +17,21 @@ export default function ProfileModal({ closeModal }) {
         <div className="register-cont">
             <div className="register-header">ПРОФИЛЬ</div>
             <div className="profile-info">
-                <p>
-                    <strong>Имя:</strong> {user?.name || 'Не указано'}
-                </p>
-                <p>
-                    <strong>Фамилия:</strong> {user?.surname || 'Не указано'}
-                </p>
-                <p>
-                    <strong>Телефон:</strong> {user?.phone || 'Не указано'}
-                </p>
+                <p className='user-profile-block-head'>имя</p>
+                <div className='user-profile-block'>
+                    {user?.name || 'Не указано'}
+                </div>
+                <p className='user-profile-block-head'>фамилия</p>
+                <div className='user-profile-block'>
+                    {user?.surname || 'Не указано'}
+                </div>
+                <p className='user-profile-block-head'>телефон</p>
+                <div className='user-profile-block'>
+                    {user?.phone || 'Не указано'}
+                </div>
             </div>
-            <div className="button-cont">
-                <button className="submit-btn" onClick={handleLogout}>
-                    выйти
-                </button>
+            <div className="logout-btn" onClick={handleLogout}>
+                выйти
             </div>
         </div>
     );
