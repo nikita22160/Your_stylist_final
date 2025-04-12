@@ -50,7 +50,7 @@ export default function SignIn({ closeModal, switchToRegister }) {
 
             const data = await response.json();
             if (response.ok) {
-                dispatch(login(data.user));
+                dispatch(login({ user: data.user, token: data.token }));
                 await persistor.flush();
                 closeModal();
                 showSuccess('Вход успешен!');

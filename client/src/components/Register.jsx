@@ -42,12 +42,12 @@ export default function Register({ closeModal, switchToSignIn }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (formData.password !== formData.confirmPassword) {
-            showWarning('Пароли не совпадают'); // Предупреждение
+            showWarning('Пароли не совпадают');
             return;
         }
 
         try {
-            const response = await fetch('/api/users', {
+            const response = await fetch('/api/signup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -60,15 +60,15 @@ export default function Register({ closeModal, switchToSignIn }) {
 
             const data = await response.json();
             if (response.ok) {
-                dispatch(login(data));
+                dispatch(login({ user: data.user, token: data.token }));
                 await persistor.flush();
                 closeModal();
-                showSuccess('Регистрация успешна!'); // Успешное уведомление
+                showSuccess('Регистрация успешна!');
             } else {
-                showError(data.message || 'Ошибка регистрации'); // Ошибка
+                showError(data.message || 'Ошибка регистрации');
             }
         } catch (error) {
-            showError('Произошла ошибка при регистрации'); // Ошибка
+            showError('Произошла ошибка при регистрации');
         }
     };
 

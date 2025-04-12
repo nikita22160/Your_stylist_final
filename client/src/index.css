@@ -1,11 +1,12 @@
 * {
   margin: 0;
   padding: 0;
-  -webkit-user-select: none;  /* Chrome/Safari */
-  -moz-user-select: none;  /* Firefox */
-  -ms-user-select: none;  /* IE/Edge */
-  user-select: none;  /* Стандартный синтаксис */
+  -webkit-user-select: none; /* Chrome/Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
+  user-select: none; /* Стандартный синтаксис */
   scrollbar-width: none;
+  font-family: SF-Pro-Display-Thin, sans-serif;
 }
 
 @font-face {
@@ -26,17 +27,27 @@
   position: relative;
   height: calc(100vh - 60px);
   padding: 30px 50px;
-  background: linear-gradient(53.661deg, rgba(255, 255, 255, 0%) 0%, rgba(252, 224, 255, 30%) 50%), linear-gradient(-122.244deg, #FFFFFF 0%, rgba(252, 224, 255, 10%) 100%);
+  background: linear-gradient(
+          53.661deg,
+          rgba(255, 255, 255, 0%) 0%,
+          rgba(252, 224, 255, 30%) 50%
+  ),
+  linear-gradient(-122.244deg, #ffffff 0%, rgba(252, 224, 255, 10%) 100%);
   overflow-x: visible;
 }
 
-@media screen and (max-width: 600px){
+@media screen and (max-width: 600px) {
   .main-container {
     overflow: hidden;
     position: relative;
     height: calc(100vh - 60px);
     padding: 30px 10px;
-    background: linear-gradient(53.661deg, rgba(255, 255, 255, 0%) 0%, rgba(252, 224, 255, 30%) 50%), linear-gradient(-122.244deg, #FFFFFF 0%, rgba(252, 224, 255, 10%) 100%);
+    background: linear-gradient(
+            53.661deg,
+            rgba(255, 255, 255, 0%) 0%,
+            rgba(252, 224, 255, 30%) 50%
+    ),
+    linear-gradient(-122.244deg, #ffffff 0%, rgba(252, 224, 255, 10%) 100%);
   }
 }
 
@@ -54,7 +65,6 @@
 }
 
 .user-name {
-  font-family: "SF-Pro-Display-Thin", sans-serif;
   font-size: 32px;
 }
 
@@ -68,7 +78,7 @@ h1 {
 
 @media screen and (min-width: 700px) {
   h1 {
-    font-family: 'Lepka', sans-serif;
+    font-family: "Lepka", sans-serif;
     font-size: 128px;
     margin-top: 100px;
     color: transparent;
@@ -86,7 +96,7 @@ h1 {
 
 @media screen and (min-width: 300px) and (max-width: 700px) {
   h1 {
-    font-family: 'Lepka', sans-serif;
+    font-family: "Lepka", sans-serif;
     font-size: 64px;
     margin-top: 100px;
     color: transparent;
@@ -114,28 +124,29 @@ h1 {
 
 /* Стили для модального окна */
 .modal-overlay {
-  position: fixed; /* Фиксируем поверх всего */
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5); /* Полупрозрачное затемнение */
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   backdrop-filter: blur(5px);
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* Высокий z-index для слоя поверх всего */
+  z-index: 1000;
   animation: fadeIn 0.3s ease-in-out;
 }
 
 .modal-content {
   background: transparent;
-  padding: 20px;
   border-radius: 8px;
   width: 400px;
   max-width: 90%;
   animation: slideIn 0.3s ease-in-out;
-  position: relative; /* Для позиционирования кнопки закрытия */
+  position: relative;
+  display: flex;
+  justify-content: center;
 }
 
 .register-cont {
@@ -149,7 +160,6 @@ h1 {
   min-width: 250px;
   max-width: 350px;
   padding: 20px 40px;
-  font-family: SF-Pro-Display-Thin, sans-serif;
   box-shadow: 0 4px 15px 4px rgba(0, 0, 0, 0.25);
 }
 
@@ -160,7 +170,6 @@ h1 {
   border-bottom: 1px solid black;
   width: 100%;
   box-sizing: border-box;
-  font-family: SF-Pro-Display-Thin, sans-serif;
   font-size: 24px;
 }
 
@@ -182,7 +191,6 @@ h1 {
   border: none;
   border-radius: 15px;
   cursor: pointer;
-  font-family: SF-Pro-Display-Thin, sans-serif;
   font-size: 24px;
   transition: 0.3s;
   line-height: 100%;
@@ -231,7 +239,6 @@ h1 {
 }
 
 .register-header {
-  font-family: SF-Pro-Display-Thin, sans-serif;
   font-size: 40px;
   margin-bottom: 40px;
 }
@@ -255,11 +262,10 @@ h1 {
 .find-btn-cont {
   display: flex;
   align-items: center;
-  gap: 10px
+  gap: 10px;
 }
 
 .find-btn {
-  font-family: SF-Pro-Display-Thin, sans-serif;
   font-size: 40px;
   background: white;
   border-radius: 15px;
@@ -270,7 +276,7 @@ h1 {
 }
 
 .find-btn:hover {
-  box-shadow: 0 4px 40px 0 rgba(0, 0, 0, 0.1);;
+  box-shadow: 0 4px 40px 0 rgba(0, 0, 0, 0.1);
 }
 
 .gallery {
@@ -279,27 +285,27 @@ h1 {
   display: flex;
   gap: 10px;
   rotate: -25deg;
-  top: -120%; /* Фиксируем вертикальное положение относительно экрана */
-  left: 0; /* Начинаем с левого края */
-  width: max-content; /* Ширина определяется содержимым */
-  transform: translateY(-70%); /* Используем твой сдвиг -70% как базовый */
-  animation: scrollRight 100s infinite linear; /* Бесконечная анимация вправо */
+  top: -120%;
+  left: 0;
+  width: max-content;
+  transform: translateY(-70%);
+  animation: scrollRight 100s infinite linear;
 }
 
 .card {
   width: 200px;
   height: 250px;
   border-radius: 10px;
-  background: #D9D9D9;
-  flex-shrink: 0; /* Предотвращаем сжатие карточек */
+  background: #d9d9d9;
+  flex-shrink: 0;
 }
 
 @keyframes scrollRight {
   0% {
-    transform: translateX(-10%) translateY(-70%); /* Начальная позиция с учётом центрирования */
+    transform: translateX(-10%) translateY(-70%);
   }
   100% {
-    transform: translateX(-75%) translateY(-70%); /* Сдвиг на 2/3 ширины галереи */
+    transform: translateX(-75%) translateY(-70%);
   }
 }
 
@@ -320,11 +326,12 @@ h1 {
 /* Стили для фильтра */
 .filter-cont {
   margin-top: 50px;
+  display: flex;
+  gap: 20px;
 }
 
 .filter-cont select {
   padding: 8px 16px;
-  font-family: 'SF-Pro-Display-Thin', sans-serif;
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 10px;
@@ -358,7 +365,6 @@ h1 {
 }
 
 .stylist-name {
-  font-family: 'SF-Pro-Display-Thin', sans-serif;
   font-size: 20px;
   margin-top: 10px;
   margin-bottom: 0;
@@ -366,7 +372,7 @@ h1 {
 }
 
 @media screen and (max-width: 600px) {
-  .cards-cont{
+  .cards-cont {
     justify-content: center;
   }
 
@@ -428,7 +434,6 @@ h1 {
   border-radius: 15px;
   border: 1px dashed darkgray;
   height: fit-content;
-  font-family: SF-Pro-Display-Thin, sans-serif;
 }
 
 .stylist-description h2 {
@@ -468,7 +473,6 @@ h1 {
 }
 
 .contact-btn {
-  font-family: SF-Pro-Display-Thin, sans-serif;
   font-size: 16px;
   font-weight: 600;
   margin-top: 10px;
@@ -499,11 +503,14 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   gap: 60px;
-  /*justify-content: center;*/
+  justify-content: center;
+}
+
+.appointment-calendar p {
+  font-size: 20px;
 }
 
 .appointment h2 {
-  font-family: SF-Pro-Display-Thin, sans-serif;
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 15px;
@@ -536,7 +543,8 @@ h1 {
   width: 250px;
 }
 
-.react-calendar__navigation__label__labelText .react-calendar__navigation__label__labelText--from {
+.react-calendar__navigation__label__labelText
+.react-calendar__navigation__label__labelText--from {
   font-family: SF-Pro-Display-Thin, sans-serif !important;
 }
 
@@ -562,7 +570,6 @@ h1 {
   border-radius: 15px;
   border: 1px dashed darkgray;
   margin-top: 10px;
-  font-family: SF-Pro-Display-Thin, sans-serif;
 }
 
 .city-stylist h2 {
@@ -572,13 +579,14 @@ h1 {
 .time-selection {
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
   gap: 15px;
   overflow-x: visible;
   width: 200px !important;
 }
 
 .time-selection h3 {
-  font-family: 'SF-Pro-Display-Thin', sans-serif;
   font-size: 20px;
   font-weight: 600;
   margin: 0;
@@ -588,7 +596,7 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  max-height: 280px; /* Ограничим высоту для прокрутки, если нужно */
+  max-height: 280px;
   overflow: auto;
   width: 200px;
 }
@@ -597,7 +605,6 @@ h1 {
   padding: 8px 12px;
   border: 1px dashed darkgray;
   border-radius: 10px;
-  font-family: 'SF-Pro-Display-Thin', sans-serif;
   font-size: 16px;
   cursor: pointer;
   background: rgba(255, 255, 255, 0.3);
@@ -623,27 +630,23 @@ h1 {
   border-bottom: 1px solid darkgray;
   padding: 5px 0;
   font-size: 16px;
-  margin-left: 20px;
   line-height: 120%;
-  font-family: SF-Pro-Display-Thin, sans-serif;
+  width: 200px;
 }
 
 .user-profile-block {
-  border-bottom: 2px dashed rgba(255, 255, 255, 0.7);;
-  font-family: 'SF-Pro-Display-Thin', sans-serif;
+  border-bottom: 2px dashed rgba(255, 255, 255, 0.7);
   margin-bottom: 15px;
   font-size: 24px;
 }
 
 .user-profile-block-head {
-  font-family: 'SF-Pro-Display-Thin', sans-serif;
   font-size: 16px;
-  color: rgba(255, 255, 255, 0.7);;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .logout-btn {
-  color: #F34040;
-  font-family: SF-Pro-Display-Thin, sans-serif;
+  color: #f34040;
   font-size: 20px;
   margin-top: 20px;
   margin-bottom: 10px;
@@ -655,23 +658,22 @@ h1 {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-family: 'SF-Pro-Display-Thin', sans-serif; /* Замени на шрифт твоего сайта, если нужно */
   font-size: 16px;
   font-weight: 500;
 }
 
 /* Общие стили для всех уведомлений */
 .Toastify__toast {
-  border-radius: 12px; /* Более закругленные углы */
-  opacity: 0.9; /* Прозрачность */
+  border-radius: 12px;
+  opacity: 0.9;
   padding: 10px 15px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease-in-out; /* Плавный переход для появления/исчезновения */
+  transition: all 0.3s ease-in-out;
 }
 
 /* Стили для успешных уведомлений */
 .toast-success {
-  background-color: #e6f4ea; /* Светло-зелёный фон, как на скриншоте */
+  background-color: #e6f4ea;
   color: #155724;
 }
 
@@ -690,7 +692,7 @@ h1 {
 /* Переопределяем стандартные стили ToastContainer */
 .Toastify__toast-container {
   width: 320px;
-  top: 20px; /* Отступ сверху */
+  top: 20px;
 }
 
 /* Плавное появление и исчезновение */
@@ -714,10 +716,458 @@ h1 {
 
 /* Стили для кнопки закрытия */
 .Toastify__close-button {
-  color: #666; /* Цвет крестика, как на скриншоте */
+  color: #666;
   opacity: 0.7;
 }
 
 .Toastify__close-button:hover {
   opacity: 1;
+}
+
+.portfolio-cont {
+  margin-top: 50px;
+  height: 90%;
+  overflow-y: scroll;
+}
+
+.portfolio-cont h2 {
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.search-cont {
+  margin-bottom: 20px;
+}
+
+.post-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px dashed darkgray;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.post-form input,
+.post-form textarea {
+  padding: 8px;
+  border: 1px solid darkgray;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+.post-form textarea {
+  padding: 8px;
+  border: 1px solid darkgray;
+  border-radius: 10px;
+  font-size: 16px;
+  min-height: 100px;
+  resize: none;
+  overflow: scroll;
+  height: 250px;
+}
+
+.posts-cont {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.portfolio-post {
+  padding: 15px;
+  border: 1px dashed darkgray;
+  border-radius: 15px;
+  position: relative;
+}
+
+.portfolio-post h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.portfolio-post p {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.hashtags {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.photo-gallery {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  overflow: hidden;
+  height: 100%;
+}
+
+.gallery-photos {
+  display: flex;
+  gap: 10px;
+  transition: transform 0.3s ease;
+  width: 100%;
+  touch-action: pan-y;
+  user-select: auto;
+}
+
+.gallery-photo {
+  object-fit: cover;
+  border-radius: 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.photo-modal {
+  background: transparent;
+  max-width: 90%;
+  max-height: 90%;
+}
+
+.zoomed-photo {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+}
+
+.calendar-block {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Стили для кнопки "Новый пост" */
+.new-post-btn {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  align-items: center;
+  cursor: pointer;
+  background: white;
+  box-shadow: 4px 4px 10px 0 rgba(0, 0, 0, 0.1);
+  transition: 0.3s;
+  border: none;
+  outline: none;
+  margin-bottom: 20px;
+  scale: 1;
+}
+
+.new-post-btn:hover {
+  scale: 1.1;
+}
+
+/* Контейнер для хэштегов */
+.hashtags-input-cont {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Стили для инпута хэштегов */
+.hashtag-input {
+  padding: 8px 15px;
+  border: 1px solid darkgray;
+  border-radius: 50px; /* Закруглённые края на 50% */
+  font-size: 14px;
+  outline: none;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.hashtag-input:focus {
+  border-color: #4caf50;
+}
+
+/* Стили для списка хэштегов */
+.hashtags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Стили для каждого хэштега */
+.hashtag-item {
+  display: flex;
+  align-items: center;
+  background-color: #e0e0e0;
+  padding: 5px 10px;
+  border-radius: 50px; /* Закруглённые края на 50% */
+  font-size: 14px;
+  gap: 5px;
+}
+
+/* Кнопка удаления хэштега */
+.remove-hashtag-btn {
+  background: none;
+  border: none;
+  color: #ff4444;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.remove-hashtag-btn:hover {
+  color: #cc0000;
+}
+
+/* Стили для хэштегов в постах */
+.hashtags .hashtag-item {
+  display: inline-flex;
+  background-color: #e0e0e0;
+  padding: 5px 10px;
+  border-radius: 50px; /* Закруглённые края на 50% */
+  margin-right: 5px;
+  margin-bottom: 5px;
+}
+
+/* Стили для кнопок формы */
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.cancel-btn {
+  background-color: transparent;
+  border: none;
+  outline: none;
+  color: red;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.photo-gallery {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  overflow: hidden;
+}
+
+.gallery-photos {
+  display: flex;
+  transition: transform 0.3s ease;
+  touch-action: pan-y;
+  user-select: auto;
+}
+
+.gallery-photo {
+  width: 335px;
+  object-fit: cover;
+  border-radius: 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.gallery-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.7);
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  font-size: 20px;
+  border-radius: 50%;
+}
+
+.left-arrow {
+  left: 10px;
+}
+
+.right-arrow {
+  right: 10px;
+}
+
+.photo-previews {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.photo-preview-cont {
+  position: relative;
+  width: 100px;
+  height: 100px;
+}
+
+.photo-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.remove-photo-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.remove-photo-btn:hover {
+  background: #cc0000;
+}
+
+.attach-photo-btn {
+  background: white;
+  border: none;
+  outline: none;
+  box-shadow: 4px 4px 10px 0 rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px;
+  border-radius: 50px;
+  cursor: pointer;
+}
+
+.add-post-btn {
+  background: white;
+  border: none;
+  outline: none;
+  box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.1);
+  padding: 5px 10px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.edit-post-btn {
+  border: none;
+  outline: none;
+  background: transparent;
+  color: grey;
+  cursor: pointer;
+
+  position: absolute;
+  top: 10px;
+  right: 40px;
+}
+
+.delete-post-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 20px;
+  border-radius: 15px;
+}
+
+.loading-icon {
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.post-content {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.post-gallery {
+  flex: 1;
+  max-width: 420px;
+}
+
+.post-info {
+  flex: 2;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.post-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.edit-post-btn,
+.delete-post-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.edit-post-btn img,
+.delete-post-btn img {
+  width: 20px;
+  height: 20px;
+}
+
+/* Адаптация для маленьких экранов */
+@media screen and (max-width: 768px) {
+  .post-content {
+    flex-direction: column;
+  }
+
+  .post-gallery {
+    width: 100%;
+  }
+
+  .post-info {
+    width: 100%;
+  }
+
+  .post-actions {
+    justify-content: flex-end;
+  }
 }

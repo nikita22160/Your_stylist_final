@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { showSuccess, showError, showWarning } from '../components/ToastNotifications';
-import PriceModal from '../components/PriceModal'; // Импортируем новый компонент
+import PriceModal from '../components/PriceModal';
 
 // Компонент профиля стилиста с возможностью записи
 export default function StylistProfile() {
@@ -15,32 +15,56 @@ export default function StylistProfile() {
     const [appointments, setAppointments] = useState([]);
     const [modalType, setModalType] = useState(null); // Состояние для модального окна
     const navigate = useNavigate();
-    const { user, isAuthenticated } = useSelector((state) => state.auth);
+    const { user, isAuthenticated, token } = useSelector((state) => state.auth);
 
     useEffect(() => {
         const fetchStylist = async () => {
             try {
-                const response = await fetch(`/api/stylists/${id}`);
+                if (!token) {
+                    throw new Error('Токен отсутствует. Пожалуйста, войдите в систему.');
+                }
+
+                const response = await fetch(`/api/stylists/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
                 const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Не удалось загрузить данные стилиста');
                 setStylist(data);
             } catch (error) {
-                showError('Ошибка загрузки стилиста');
+                showError(`Ошибка загрузки стилиста: ${error.message}`);
+                if (error.message.includes('Токен')) {
+                    navigate('/'); // Перенаправляем на главную, если токен отсутствует
+                }
             }
         };
 
         const fetchAppointments = async () => {
             try {
-                const response = await fetch(`/api/stylists/${id}/appointments`);
+                if (!token) {
+                    throw new Error('Токен отсутствует. Пожалуйста, войдите в систему.');
+                }
+
+                const response = await fetch(`/api/stylists/${id}/appointments`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
                 const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Не удалось загрузить записи');
                 setAppointments(data);
             } catch (error) {
-                showError('Ошибка загрузки записей');
+                showError(`Ошибка загрузки записей: ${error.message}`);
+                if (error.message.includes('Токен')) {
+                    navigate('/'); // Перенаправляем на главную, если токен отсутствует
+                }
             }
         };
 
         fetchStylist();
         fetchAppointments();
-    }, [id]);
+    }, [id, token, navigate]);
 
     const handleDateChange = (date) => {
         setSelectedDate(date);
@@ -63,9 +87,16 @@ export default function StylistProfile() {
         }
 
         try {
+            if (!token) {
+                throw new Error('Токен отсутствует. Пожалуйста, войдите в систему.');
+            }
+
             const response = await fetch(`/api/stylists/${id}/appointments`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
                 body: JSON.stringify({
                     userId: user._id,
                     date: selectedDate,
@@ -75,7 +106,7 @@ export default function StylistProfile() {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.message);
+                throw new Error(errorData.message || 'Не удалось создать запись');
             }
 
             const newAppointment = await response.json();
@@ -85,6 +116,9 @@ export default function StylistProfile() {
             setSelectedTime(null);
         } catch (error) {
             showError(`Ошибка при записи: ${error.message}`);
+            if (error.message.includes('Токен')) {
+                navigate('/'); // Перенаправляем на главную, если токен отсутствует
+            }
         }
     };
 
@@ -157,7 +191,7 @@ export default function StylistProfile() {
                         <div className="contact-btn" onClick={() => window.open(stylist.chatLink, '_blank')}>
                             связаться
                         </div>
-                        <div className="contact-btn" onClick={() => window.open(stylist.chatLink, '_blank')}>
+                        <div className="contact-btn" onClick={() => navigate(`/stylist/${id}/portfolio`)}>
                             портфолио
                         </div>
                         <div className="contact-btn" onClick={handlePriceClick}>
@@ -170,9 +204,10 @@ export default function StylistProfile() {
                             <p>{stylist.description}</p>
                         </div>
                         <div className="appointment">
+                            <h2>Записаться</h2>
                             <div className="appointment-calendar">
-                                <div>
-                                    <h2>Выберите дату</h2>
+                                <div className='calendar-block'>
+                                    <p>выберите дату</p>
                                     <Calendar
                                         onChange={handleDateChange}
                                         value={selectedDate}
@@ -182,7 +217,7 @@ export default function StylistProfile() {
                                 </div>
                                 {selectedDate && (
                                     <div className="time-selection">
-                                        <h3>Выберите время</h3>
+                                        <p>выберите время</p>
                                         <div className="time-list">
                                             {availableTimes.length > 0 ? (
                                                 availableTimes.map((time) => (
