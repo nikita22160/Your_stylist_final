@@ -428,18 +428,19 @@ h1 {
   border-radius: 15px;
   border: 1px dashed darkgray;
   height: fit-content;
+  font-family: SF-Pro-Display-Thin, sans-serif;
 }
 
 .stylist-description h2 {
-  font-family: SF-Pro-Display-Thin, sans-serif;
   font-size: 20px;
   font-weight: 600;
 }
 
 .stylist-description p {
-  font-family: SF-Pro-Display-Thin, sans-serif;
-  font-size: 16px;
+  font-size: 20px;
+  font-weight: 400;
   margin-top: 15px;
+  white-space: pre-wrap;
 }
 
 @media screen and (max-width: 840px) {
@@ -498,7 +499,7 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   gap: 60px;
-  justify-content: center;
+  /*justify-content: center;*/
 }
 
 .appointment h2 {

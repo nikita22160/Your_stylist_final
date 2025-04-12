@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { showSuccess, showError, showWarning } from '../components/ToastNotifications';
+import PriceModal from '../components/PriceModal'; // Импортируем новый компонент
 
 // Компонент профиля стилиста с возможностью записи
 export default function StylistProfile() {
@@ -12,6 +13,7 @@ export default function StylistProfile() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedTime, setSelectedTime] = useState(null);
     const [appointments, setAppointments] = useState([]);
+    const [modalType, setModalType] = useState(null); // Состояние для модального окна
     const navigate = useNavigate();
     const { user, isAuthenticated } = useSelector((state) => state.auth);
 
@@ -115,6 +117,16 @@ export default function StylistProfile() {
 
     const availableTimes = getAvailableHoursForDate();
 
+    // Закрытие модального окна
+    const closeModal = () => {
+        setModalType(null);
+    };
+
+    // Открытие модального окна с ценами
+    const handlePriceClick = () => {
+        setModalType('prices');
+    };
+
     if (!stylist) {
         return <div className="main-container">Загрузка...</div>;
     }
@@ -139,7 +151,7 @@ export default function StylistProfile() {
                             </div>
                         </div>
                         <div className="city-stylist">
-                            <h2>Города</h2>
+                            <h2>Город</h2>
                             <p>{stylist.city}</p>
                         </div>
                         <div className="contact-btn" onClick={() => window.open(stylist.chatLink, '_blank')}>
@@ -148,7 +160,7 @@ export default function StylistProfile() {
                         <div className="contact-btn" onClick={() => window.open(stylist.chatLink, '_blank')}>
                             портфолио
                         </div>
-                        <div className="contact-btn" onClick={() => window.open(stylist.chatLink, '_blank')}>
+                        <div className="contact-btn" onClick={handlePriceClick}>
                             цены
                         </div>
                     </div>
@@ -201,6 +213,15 @@ export default function StylistProfile() {
                     </div>
                 </div>
             </div>
+
+            {/* Модальное окно */}
+            {modalType && (
+                <div className="modal-overlay" onClick={closeModal}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        {modalType === 'prices' && <PriceModal closeModal={closeModal} stylist={stylist} />}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
