@@ -863,11 +863,10 @@ h1 {
   border: none;
   outline: none;
   margin-bottom: 20px;
-  scale: 1;
 }
 
 .new-post-btn:hover {
-  scale: 1.1;
+  font-size: 18px;
 }
 
 /* Контейнер для хэштегов */
@@ -1151,6 +1150,113 @@ h1 {
 .delete-post-btn img {
   width: 20px;
   height: 20px;
+}
+
+/* Адаптация для маленьких экранов */
+@media screen and (max-width: 768px) {
+  .post-content {
+    flex-direction: column;
+  }
+
+  .post-gallery {
+    width: 100%;
+  }
+
+  .post-info {
+    width: 100%;
+  }
+
+  .post-actions {
+    justify-content: flex-end;
+  }
+}
+
+.post-content {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.post-gallery {
+  flex: 1;
+  max-width: 375px;
+  height: 375px;
+}
+
+.post-info {
+  flex: 2;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.post-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.edit-post-btn,
+.delete-post-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.edit-post-btn img,
+.delete-post-btn img {
+  width: 20px;
+  height: 20px;
+}
+
+.photo-gallery {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 375px;
+  height: 375px;
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.gallery-photos {
+  display: flex;
+  transition: transform 0.3s ease;
+  height: 100%;
+  touch-action: pan-y;
+  user-select: auto;
+}
+
+.gallery-photo {
+  width: 335px;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.gallery-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.7);
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  font-size: 20px;
+  border-radius: 50%;
+  z-index: 10;
+}
+
+.left-arrow {
+  left: 10px;
+}
+
+.right-arrow {
+  right: 10px;
 }
 
 /* Адаптация для маленьких экранов */

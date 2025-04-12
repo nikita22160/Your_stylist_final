@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { showSuccess, showError } from '../components/ToastNotifications';
-import PhotoGallery from '../components/PhotoGallery'; // Импортируем новый компонент
+import PhotoGallery from '../components/PhotoGallery';
 
-// Компонент страницы портфолио стилиста
 export default function StylistPortfolio() {
     const { id } = useParams();
     const [stylist, setStylist] = useState(null);
@@ -102,6 +101,14 @@ export default function StylistPortfolio() {
         });
         setPreviewPhotos(post.photos);
         setIsFormVisible(true);
+
+        // Прокручиваем к форме редактирования
+        setTimeout(() => {
+            const formElement = document.getElementById('edit-post-form');
+            if (formElement) {
+                formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 0);
     };
 
     const handleDeletePost = async (postId) => {
@@ -244,7 +251,7 @@ export default function StylistPortfolio() {
                 )}
 
                 {isStylist && isFormVisible && (
-                    <form className="post-form" onSubmit={handleSubmitPost}>
+                    <form id="edit-post-form" className="post-form" onSubmit={handleSubmitPost}>
                         <input
                             type="text"
                             name="title"
@@ -264,7 +271,7 @@ export default function StylistPortfolio() {
                             <div className="hashtag-input-container">
                                 <input
                                     type="text"
-                                    placeholder="Введите хэштег и нажмите Enter"
+                                    placeholder="мода"
                                     value={hashtagInput}
                                     onChange={(e) => setHashtagInput(e.target.value)}
                                     onKeyDown={handleHashtagKeyDown}
