@@ -73,7 +73,7 @@ router.get('/stylists/:id/appointments', authenticateToken, async (req, res) => 
             query.userId = req.user._id;
         }
 
-        const appointments = await Appointment.find(query);
+        const appointments = await Appointment.find(query).populate('userId');
         res.json(appointments);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -108,9 +108,47 @@ router.post('/stylists/:id/appointments', authenticateToken, async (req, res) =>
             time,
         });
         await appointment.save();
-        res.status(201).json(appointment);
+
+        // Популируем данные пользователя перед отправкой ответа
+        const populatedAppointment = await Appointment.findById(appointment._id).populate('userId');
+        res.status(201).json(populatedAppointment);
     } catch (error) {
         res.status(400).json({ message: error.message });
+    }
+});
+
+// Удалить запись
+router.delete('/stylists/:id/appointments/:appointmentId', authenticateToken, async (req, res) => {
+    try {
+        const { id, appointmentId } = req.params;
+
+        // Проверяем, что стилист существует
+        const stylist = await Stylist.findById(id);
+        if (!stylist) {
+            return res.status(404).json({ message: 'Стилист не найден' });
+        }
+
+        // Проверяем, что пользователь — это стилист
+        if (stylist.phone !== req.user.phone) {
+            return res.status(403).json({ message: 'Unauthorized: You are not this stylist' });
+        }
+
+        // Находим запись
+        const appointment = await Appointment.findById(appointmentId);
+        if (!appointment) {
+            return res.status(404).json({ message: 'Запись не найдена' });
+        }
+
+        // Проверяем, что запись принадлежит этому стилисту
+        if (appointment.stylistId.toString() !== id) {
+            return res.status(403).json({ message: 'Unauthorized: This appointment does not belong to this stylist' });
+        }
+
+        // Удаляем запись
+        await Appointment.deleteOne({ _id: appointmentId });
+        res.json({ message: 'Запись успешно удалена' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 });
 

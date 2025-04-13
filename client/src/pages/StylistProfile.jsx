@@ -6,16 +6,17 @@ import 'react-calendar/dist/Calendar.css';
 import { showSuccess, showError, showWarning } from '../components/ToastNotifications';
 import PriceModal from '../components/PriceModal';
 
-// Компонент профиля стилиста с возможностью записи
 export default function StylistProfile() {
     const { id } = useParams();
     const [stylist, setStylist] = useState(null);
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedTime, setSelectedTime] = useState(null);
     const [appointments, setAppointments] = useState([]);
-    const [modalType, setModalType] = useState(null); // Состояние для модального окна
+    const [modalType, setModalType] = useState(null);
     const navigate = useNavigate();
     const { user, isAuthenticated, token } = useSelector((state) => state.auth);
+
+    const isStylist = isAuthenticated && user && stylist && stylist.phone === user.phone;
 
     useEffect(() => {
         const fetchStylist = async () => {
@@ -35,7 +36,7 @@ export default function StylistProfile() {
             } catch (error) {
                 showError(`Ошибка загрузки стилиста: ${error.message}`);
                 if (error.message.includes('Токен')) {
-                    navigate('/'); // Перенаправляем на главную, если токен отсутствует
+                    navigate('/');
                 }
             }
         };
@@ -57,7 +58,7 @@ export default function StylistProfile() {
             } catch (error) {
                 showError(`Ошибка загрузки записей: ${error.message}`);
                 if (error.message.includes('Токен')) {
-                    navigate('/'); // Перенаправляем на главную, если токен отсутствует
+                    navigate('/');
                 }
             }
         };
@@ -117,7 +118,32 @@ export default function StylistProfile() {
         } catch (error) {
             showError(`Ошибка при записи: ${error.message}`);
             if (error.message.includes('Токен')) {
-                navigate('/'); // Перенаправляем на главную, если токен отсутствует
+                navigate('/');
+            }
+        }
+    };
+
+    const handleCancelAppointment = async (appointmentId) => {
+        try {
+            const response = await fetch(`/api/stylists/${id}/appointments/${appointmentId}`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Не удалось отменить запись');
+            }
+
+            // Удаляем запись из состояния
+            setAppointments(appointments.filter((appt) => appt._id !== appointmentId));
+            showSuccess('Запись успешно отменена!');
+        } catch (error) {
+            showError(`Ошибка при отмене записи: ${error.message}`);
+            if (error.message.includes('Токен')) {
+                navigate('/');
             }
         }
     };
@@ -151,12 +177,10 @@ export default function StylistProfile() {
 
     const availableTimes = getAvailableHoursForDate();
 
-    // Закрытие модального окна
     const closeModal = () => {
         setModalType(null);
     };
 
-    // Открытие модального окна с ценами
     const handlePriceClick = () => {
         setModalType('prices');
     };
@@ -203,53 +227,82 @@ export default function StylistProfile() {
                             <h2>Описание</h2>
                             <p>{stylist.description}</p>
                         </div>
-                        <div className="appointment">
-                            <h2>Записаться</h2>
-                            <div className="appointment-calendar">
-                                <div className='calendar-block'>
-                                    <p>выберите дату</p>
-                                    <Calendar
-                                        onChange={handleDateChange}
-                                        value={selectedDate}
-                                        minDate={new Date()}
-                                        tileDisabled={isDateDisabled}
-                                    />
+
+                        {isStylist ? (
+                            <div className="appointment">
+                                <h2>Мои записи</h2>
+                                <div className="my-appointment-list">
+                                    {appointments.length > 0 ? (
+                                        appointments.map((appt) => (
+                                            <div key={appt._id} className="my-appointment">
+                                                <p>{new Date(appt.date).toLocaleDateString('ru-RU')} в {appt.time}</p>
+                                                <p>
+                                                    {appt.userId?.name && appt.userId?.surname
+                                                        ? `${appt.userId.name} ${appt.userId.surname}`
+                                                        : 'Клиент не указан'}
+                                                </p>
+                                                <p>{appt.userId?.phone || 'Телефон не указан'}</p>
+                                                <div
+                                                    className="remove-appointment"
+                                                    onClick={() => handleCancelAppointment(appt._id)}
+                                                >
+                                                    отменить
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p>У вас пока нет записей.</p>
+                                    )}
                                 </div>
-                                {selectedDate && (
-                                    <div className="time-selection">
-                                        <p>выберите время</p>
-                                        <div className="time-list">
-                                            {availableTimes.length > 0 ? (
-                                                availableTimes.map((time) => (
-                                                    <div
-                                                        key={time}
-                                                        className={`time-slot ${selectedTime === time ? 'selected' : ''}`}
-                                                        onClick={() => handleTimeChange(time)}
-                                                    >
-                                                        {time}
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <p>Нет доступных часов</p>
-                                            )}
+                            </div>
+                        ) : (
+                            <div className="appointment">
+                                <h2>Записаться</h2>
+                                <div className="appointment-calendar">
+                                    <div className="calendar-block">
+                                        <p>выберите дату</p>
+                                        <Calendar
+                                            onChange={handleDateChange}
+                                            value={selectedDate}
+                                            minDate={new Date()}
+                                            tileDisabled={isDateDisabled}
+                                        />
+                                    </div>
+                                    {selectedDate && (
+                                        <div className="time-selection">
+                                            <p>выберите время</p>
+                                            <div className="time-list">
+                                                {availableTimes.length > 0 ? (
+                                                    availableTimes.map((time) => (
+                                                        <div
+                                                            key={time}
+                                                            className={`time-slot ${selectedTime === time ? 'selected' : ''}`}
+                                                            onClick={() => handleTimeChange(time)}
+                                                        >
+                                                            {time}
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <p>Нет доступных часов</p>
+                                                )}
+                                            </div>
                                         </div>
+                                    )}
+                                </div>
+                                {selectedDate && selectedTime && (
+                                    <div
+                                        className={`contact-btn book-btn ${selectedDate && selectedTime ? 'active' : ''}`}
+                                        onClick={handleBookAppointment}
+                                    >
+                                        записаться
                                     </div>
                                 )}
                             </div>
-                            {selectedDate && selectedTime && (
-                                <div
-                                    className={`contact-btn book-btn ${selectedDate && selectedTime ? 'active' : ''}`}
-                                    onClick={handleBookAppointment}
-                                >
-                                    записаться
-                                </div>
-                            )}
-                        </div>
+                        )}
                     </div>
                 </div>
             </div>
 
-            {/* Модальное окно */}
             {modalType && (
                 <div className="modal-overlay" onClick={closeModal}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
