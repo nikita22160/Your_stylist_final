@@ -29,6 +29,11 @@ export default function Register({ closeModal, switchToSignIn }) {
         return formatted;
     };
 
+    const normalizePhone = (phone) => {
+        const digits = phone.replace(/\D/g, '');
+        return digits.startsWith('+') ? digits : `+${digits}`;
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         if (name === 'phone') {
@@ -47,13 +52,14 @@ export default function Register({ closeModal, switchToSignIn }) {
         }
 
         try {
+            const normalizedPhone = normalizePhone(formData.phone);
             const response = await fetch('/api/signup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name: formData.name,
                     surname: formData.surname,
-                    phone: formData.phone,
+                    phone: normalizedPhone,
                     password: formData.password,
                 }),
             });

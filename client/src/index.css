@@ -155,7 +155,7 @@ h1 {
   background-color: rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(20px);
   border-radius: 15px;
-  width: 30vw;
+  width: 40vw;
   min-width: 250px;
   max-width: 350px;
   padding: 20px 40px;
@@ -671,6 +671,17 @@ h1 {
   cursor: pointer;
   padding: 0 5px;
   border: 1px dashed #f34040;
+  border-radius: 15px;
+  margin: 5px auto auto;
+}
+
+.confirm-appointment {
+  color: green;
+  width: fit-content;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 5px;
+  border: 1px dashed green;
   border-radius: 15px;
   margin: 5px auto auto;
 }
@@ -1301,7 +1312,7 @@ h1 {
 }
 
 .my-appointment {
-  padding: 5px;
+  padding: 10px 20px;
   border: 1px solid darkgrey;
   min-width: 140px;
   border-radius: 10px;
@@ -1310,6 +1321,17 @@ h1 {
   flex-direction: column;
   gap: 5px;
   flex-shrink: 0; /* Предотвращаем сжатие элементов */
+}
+
+.my-appointment h2 {
+  color: white;
+  font-size: 14px;
+  margin: 0;
+  text-align: left;
+}
+
+.my-appointment p {
+  text-align: left;
 }
 
 .my-appointment-list {
@@ -1341,3 +1363,20 @@ h1 {
   }
 }
 
+.horizontal-appointment-list {
+  display: flex;
+  overflow-x: auto; /* Горизонтальный скролл */
+  gap: 20px; /* Отступ между карточками */
+  padding: 10px 10px;
+  white-space: nowrap; /* Предотвращает перенос элементов */
+  -webkit-overflow-scrolling: touch; /* Плавный скролл на мобильных устройствах */
+}
+
+.horizontal-appointment-list::-webkit-scrollbar {
+  height: 8px;
+}
+
+.horizontal-appointment-list .my-appointment {
+  min-width: 200px;
+  overflow-wrap: break-word;
+}

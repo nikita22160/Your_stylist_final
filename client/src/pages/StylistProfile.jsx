@@ -18,7 +18,22 @@ export default function StylistProfile() {
     const navigate = useNavigate();
     const { user, isAuthenticated, token } = useSelector((state) => state.auth);
 
-    const isStylist = isAuthenticated && user && stylist && stylist.phone === user.phone;
+    // Функция для нормализации номера телефона
+    const normalizePhone = (phone) => {
+        if (!phone) return '';
+        const digits = phone.replace(/\D/g, '');
+        return digits.startsWith('+') ? digits : `+${digits}`;
+    };
+
+    // Проверяем, является ли пользователь стилистом
+    const isStylist = isAuthenticated && user && stylist && user.role === 'stylist' && normalizePhone(stylist.phone) === normalizePhone(user.phone);
+
+    // Логируем для отладки
+    useEffect(() => {
+        console.log('User from Redux:', user);
+        console.log('Stylist:', stylist);
+        console.log('isStylist:', isStylist);
+    }, [user, stylist, isStylist]);
 
     useEffect(() => {
         const fetchStylist = async () => {
@@ -142,9 +157,8 @@ export default function StylistProfile() {
             const newAppointment = data.appointment;
 
             setAppointments([...appointments, newAppointment]);
-            showSuccess('Запись успешно создана!');
+            showSuccess('Заявка на запись создана! Ожидайте подтверждения стилиста.');
 
-            // Проверяем, зарегистрирован ли пользователь в Telegram
             await checkTelegramUser();
 
             setSelectedDate(null);
@@ -158,6 +172,11 @@ export default function StylistProfile() {
     };
 
     const handleCancelAppointment = async (appointmentId) => {
+        if (!isStylist) {
+            showError('Только стилист может отменить запись');
+            return;
+        }
+
         try {
             const response = await fetch(`/api/stylists/${id}/appointments/${appointmentId}`, {
                 method: 'DELETE',
@@ -171,11 +190,43 @@ export default function StylistProfile() {
                 throw new Error(errorData.message || 'Не удалось отменить запись');
             }
 
-            // Удаляем запись из состояния
             setAppointments(appointments.filter((appt) => appt._id !== appointmentId));
             showSuccess('Запись успешно отменена!');
         } catch (error) {
             showError(`Ошибка при отмене записи: ${error.message}`);
+            if (error.message.includes('Токен')) {
+                navigate('/');
+            }
+        }
+    };
+
+    const handleConfirmAppointment = async (appointmentId) => {
+        if (!isStylist) {
+            showError('Только стилист может подтвердить запись');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/stylists/${id}/appointments/${appointmentId}/confirm`, {
+                method: 'PATCH',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Не удалось подтвердить запись');
+            }
+
+            setAppointments(
+                appointments.map((appt) =>
+                    appt._id === appointmentId ? { ...appt, status: 'Подтверждена' } : appt
+                )
+            );
+            showSuccess('Запись успешно подтверждена!');
+        } catch (error) {
+            showError(`Ошибка при подтверждении записи: ${error.message}`);
             if (error.message.includes('Токен')) {
                 navigate('/');
             }
@@ -281,11 +332,22 @@ export default function StylistProfile() {
                                                         : 'Клиент не указан'}
                                                 </p>
                                                 <p>{appt.userId?.phone || 'Телефон не указан'}</p>
-                                                <div
-                                                    className="remove-appointment"
-                                                    onClick={() => handleCancelAppointment(appt._id)}
-                                                >
-                                                    отменить
+                                                <p>Статус: {appt.status}</p>
+                                                <div style={{ display: 'flex', gap: '10px' }}>
+                                                    <div
+                                                        className="remove-appointment"
+                                                        onClick={() => handleCancelAppointment(appt._id)}
+                                                    >
+                                                        отменить
+                                                    </div>
+                                                    {appt.status === 'В ожидании' && (
+                                                        <div
+                                                            className="confirm-appointment"
+                                                            onClick={() => handleConfirmAppointment(appt._id)}
+                                                        >
+                                                            подтвердить
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         ))

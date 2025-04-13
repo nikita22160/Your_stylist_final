@@ -26,6 +26,11 @@ export default function SignIn({ closeModal, switchToRegister }) {
         return formatted;
     };
 
+    const normalizePhone = (phone) => {
+        const digits = phone.replace(/\D/g, '');
+        return digits.startsWith('+') ? digits : `+${digits}`;
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         if (name === 'phone') {
@@ -39,16 +44,18 @@ export default function SignIn({ closeModal, switchToRegister }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            const normalizedPhone = normalizePhone(formData.phone);
             const response = await fetch('/api/signin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    phone: formData.phone,
+                    phone: normalizedPhone,
                     password: formData.password,
                 }),
             });
 
             const data = await response.json();
+            console.log('SignIn response:', data); // Логируем ответ сервера
             if (response.ok) {
                 dispatch(login({ user: data.user, token: data.token }));
                 await persistor.flush();

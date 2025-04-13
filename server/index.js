@@ -48,12 +48,13 @@ cron.schedule('0 0 * * *', async () => { // Запускается каждый 
         const tomorrowEnd = new Date(tomorrow);
         tomorrowEnd.setHours(23, 59, 59, 999);
 
-        // Находим записи на завтра
+        // Находим подтверждённые записи на завтра
         const appointments = await Appointment.find({
             date: {
                 $gte: tomorrow,
                 $lte: tomorrowEnd,
             },
+            status: 'Подтверждена', // Только подтверждённые записи
         }).populate('userId').populate('stylistId');
 
         for (const appointment of appointments) {

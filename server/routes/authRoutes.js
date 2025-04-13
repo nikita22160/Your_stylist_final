@@ -7,12 +7,21 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
+// Функция для нормализации номера телефона
+const normalizePhone = (phone) => {
+    const digits = phone.replace(/\D/g, '');
+    return digits.startsWith('+') ? digits : `+${digits}`;
+};
+
 router.post('/signup', async (req, res) => {
     try {
-        const { name, surname, phone, password } = req.body;
+        const { name, surname, phone, password, role } = req.body;
+
+        // Нормализуем номер телефона
+        const normalizedPhone = normalizePhone(phone);
 
         // Проверяем, существует ли пользователь с таким номером телефона
-        const existingUser = await User.findOne({ phone });
+        const existingUser = await User.findOne({ phone: normalizedPhone });
         if (existingUser) {
             return res.status(400).json({ message: 'Пользователь с таким номером телефона уже зарегистрирован!' });
         }
@@ -23,17 +32,23 @@ router.post('/signup', async (req, res) => {
         const user = new User({
             name,
             surname,
-            phone,
+            phone: normalizedPhone,
             password: hashedPassword,
+            role: role || 'user', // По умолчанию 'user', если role не указан
         });
         await user.save();
 
         // Генерируем JWT-токен
-        const token = jwt.sign({ _id: user._id, phone: user.phone }, process.env.JWT_SECRET, {
-            expiresIn: '1h',
-        });
+        const token = jwt.sign(
+            { _id: user._id, phone: user.phone, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
 
-        res.status(201).json({ token, user: { _id: user._id, name: user.name, surname: user.surname, phone: user.phone } });
+        res.status(201).json({
+            token,
+            user: { _id: user._id, name: user.name, surname: user.surname, phone: user.phone, role: user.role }
+        });
     } catch (error) {
         if (error.code === 11000 && error.keyPattern.phone) {
             return res.status(400).json({ message: 'Пользователь с таким номером телефона уже зарегистрирован!' });
@@ -46,7 +61,10 @@ router.post('/signin', async (req, res) => {
     try {
         const { phone, password } = req.body;
 
-        const user = await User.findOne({ phone });
+        // Нормализуем номер телефона
+        const normalizedPhone = normalizePhone(phone);
+
+        const user = await User.findOne({ phone: normalizedPhone });
         if (!user) {
             return res.status(400).json({ message: 'Пользователь с таким номером телефона не найден' });
         }
@@ -58,11 +76,16 @@ router.post('/signin', async (req, res) => {
         }
 
         // Генерируем JWT-токен
-        const token = jwt.sign({ _id: user._id, phone: user.phone }, process.env.JWT_SECRET, {
-            expiresIn: '1h',
-        });
+        const token = jwt.sign(
+            { _id: user._id, phone: user.phone, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
 
-        res.json({ token, user: { _id: user._id, name: user.name, surname: user.surname, phone: user.phone } });
+        res.json({
+            token,
+            user: { _id: user._id, name: user.name, surname: user.surname, phone: user.phone, role: user.role }
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

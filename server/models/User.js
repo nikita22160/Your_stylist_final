@@ -12,10 +12,15 @@ const userSchema = new mongoose.Schema({
     phone: {
         type: String,
         required: true,
-        unique: true, // Номер телефона уникален
+        unique: true,
     },
     password: {
         type: String,
+        required: true,
+    },
+    role: {
+        type: String,
+        default: 'user', // По умолчанию пользователь — не стилист
         required: true,
     },
 });
