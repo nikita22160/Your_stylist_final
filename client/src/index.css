@@ -23,7 +23,7 @@
 }
 
 .main-container {
-  overflow: hidden;
+  overflow: hidden; /* Запрещаем прокрутку на уровне main-container */
   position: relative;
   height: calc(100vh - 60px);
   padding: 30px 50px;
@@ -33,7 +33,6 @@
           rgba(252, 224, 255, 30%) 50%
   ),
   linear-gradient(-122.244deg, #ffffff 0%, rgba(252, 224, 255, 10%) 100%);
-  overflow-x: visible;
 }
 
 @media screen and (max-width: 600px) {
@@ -161,6 +160,12 @@ h1 {
   max-width: 350px;
   padding: 20px 40px;
   box-shadow: 0 4px 15px 4px rgba(0, 0, 0, 0.25);
+}
+
+.register-cont p{
+  font-size: 20px;
+  text-align: center;
+  margin-bottom: 10px;
 }
 
 .register-cont input {
@@ -399,12 +404,14 @@ h1 {
   margin-top: 40px;
   height: 90%;
   width: 100%;
-  overflow-y: scroll;
+  overflow-y: auto; /* Используем auto вместо scroll */
+  overflow-x: hidden; /* Запрещаем горизонтальную прокрутку на этом уровне */
 }
 
 .stylist-main-info {
   display: flex;
   gap: 10px;
+  width: 100%;
 }
 
 .stylist-photo-name {
@@ -486,6 +493,8 @@ h1 {
   background: white;
   box-shadow: 4px 4px 10px 0 rgba(0, 0, 0, 0.1);
   transition: 0.3s;
+  text-decoration: none;
+  color: black;
 }
 
 .contact-btn:hover {
@@ -497,6 +506,8 @@ h1 {
   padding: 10px;
   border-radius: 15px;
   border: 1px dashed darkgray;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .appointment-calendar {
@@ -1295,14 +1306,38 @@ h1 {
   min-width: 140px;
   border-radius: 10px;
   font-size: 16px;
-  display: flex;
+  display: inline-flex; /* Используем inline-flex вместо flex */
   flex-direction: column;
   gap: 5px;
+  flex-shrink: 0; /* Предотвращаем сжатие элементов */
 }
 
 .my-appointment-list {
   display: flex;
   gap: 10px;
   width: 100%;
-  overflow-x: scroll;
+  overflow-x: auto; /* Используем auto вместо scroll для более естественного поведения */
+  white-space: nowrap; /* Предотвращаем перенос элементов на новую строку */
+  scrollbar-width: thin; /* Тонкая полоса прокрутки для Firefox */
 }
+
+@media screen and (min-width: 841px) {
+  /* Стили для Webkit-браузеров (Chrome, Safari) */
+  .my-appointment-list::-webkit-scrollbar {
+    height: 8px; /* Высота полосы прокрутки */
+  }
+
+  .my-appointment-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3); /* Цвет ползунка */
+    border-radius: 4px;
+  }
+
+  .my-appointment-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.5); /* Цвет при наведении */
+  }
+
+  .my-appointment-list {
+    flex-wrap: wrap;
+  }
+}
+

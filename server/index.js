@@ -6,6 +6,12 @@ const authRoutes = require('./routes/authRoutes');
 const postRoutes = require('./routes/portfolioRoutes');
 const dotenv = require('dotenv');
 const cloudinary = require('cloudinary').v2;
+const cron = require('node-cron');
+const Appointment = require('./models/Appointment');
+const Stylist = require('./models/Stylist');
+const TelegramUser = require('./models/TelegramUser');
+const { sendNotification } = require('./telegramBot');
+
 const app = express();
 
 // Загружаем переменные окружения
@@ -30,6 +36,60 @@ app.use('/api', postRoutes);
 
 app.get('/', (req, res) => {
     res.send('Welcome to the Stylist API');
+});
+
+// Планировщик задач для напоминаний за день
+cron.schedule('0 0 * * *', async () => { // Запускается каждый день в 00:00
+    try {
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setDate(now.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+        const tomorrowEnd = new Date(tomorrow);
+        tomorrowEnd.setHours(23, 59, 59, 999);
+
+        // Находим записи на завтра
+        const appointments = await Appointment.find({
+            date: {
+                $gte: tomorrow,
+                $lte: tomorrowEnd,
+            },
+        }).populate('userId').populate('stylistId');
+
+        for (const appointment of appointments) {
+            const userId = appointment.userId._id;
+            const stylistId = appointment.stylistId._id;
+            const appointmentDate = new Date(appointment.date).toLocaleDateString('ru-RU');
+
+            // Данные для уведомлений
+            const userName = `${appointment.userId.name} ${appointment.userId.surname}`;
+            const userPhone = appointment.userId.phone;
+            const stylistName = `${appointment.stylistId.name} ${appointment.stylistId.surname}`;
+            const stylistPhone = appointment.stylistId.phone;
+            const stylistChatLink = appointment.stylistId.chatLink || 'Свяжитесь через сайт';
+
+            // Находим Telegram-пользователей
+            const userTelegram = await TelegramUser.findOne({ userId });
+            const stylistTelegram = await TelegramUser.findOne({ userId: stylistId });
+
+            // Формируем ссылку на Telegram пользователя (если он подключён и имеет username)
+            const userChatLink = userTelegram && userTelegram.username ? `https://t.me/${userTelegram.username.replace('@', '')}` : 'Свяжитесь через сайт';
+
+            // Отправляем уведомления пользователю
+            if (userTelegram) {
+                const userMessage = `Напоминание: у вас запись к стилисту ${stylistName} на ${appointmentDate} в ${appointment.time}.\n📞 Телефон стилиста: ${stylistPhone}\n💬 Связаться: ${stylistChatLink}`;
+                await sendNotification(userTelegram.chatId, userMessage);
+            }
+
+            // Отправляем уведомления стилисту
+            if (stylistTelegram) {
+                const stylistMessage = `Напоминание: к вам запись от клиента ${userName} на ${appointmentDate} в ${appointment.time}.\n📞 Телефон клиента: ${userPhone}\n💬 Связаться: ${userChatLink}`;
+                await sendNotification(stylistTelegram.chatId, stylistMessage);
+            }
+        }
+    } catch (error) {
+        console.error('Ошибка в планировщике напоминаний:', error.message);
+    }
 });
 
 // Обработка ошибок

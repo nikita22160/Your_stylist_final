@@ -2,8 +2,10 @@ const express = require('express');
 const router = express.Router();
 const Stylist = require('../models/Stylist');
 const Appointment = require('../models/Appointment');
+const TelegramUser = require('../models/TelegramUser');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
+const { sendNotification } = require('../telegramBot');
 
 dotenv.config();
 
@@ -80,6 +82,22 @@ router.get('/stylists/:id/appointments', authenticateToken, async (req, res) => 
     }
 });
 
+// Новый маршрут: Проверка, зарегистрирован ли пользователь в Telegram
+router.get('/check-telegram-user', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const telegramUser = await TelegramUser.findOne({ userId });
+
+        if (telegramUser) {
+            return res.json({ isRegistered: true });
+        } else {
+            return res.json({ isRegistered: false, botLink: 'https://t.me/StylistReminderBot' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // Создать новую запись
 router.post('/stylists/:id/appointments', authenticateToken, async (req, res) => {
     try {
@@ -109,9 +127,49 @@ router.post('/stylists/:id/appointments', authenticateToken, async (req, res) =>
         });
         await appointment.save();
 
-        // Популируем данные пользователя перед отправкой ответа
-        const populatedAppointment = await Appointment.findById(appointment._id).populate('userId');
-        res.status(201).json(populatedAppointment);
+        // Популируем данные пользователя и стилиста перед отправкой ответа
+        const populatedAppointment = await Appointment.findById(appointment._id)
+            .populate('userId')
+            .populate('stylistId');
+
+        // Формируем уведомления
+        const userIdFromAppointment = populatedAppointment.userId._id;
+        const stylistIdFromAppointment = populatedAppointment.stylistId._id;
+        const appointmentDate = new Date(appointment.date).toLocaleDateString('ru-RU');
+
+        // Данные для уведомлений
+        const userName = `${populatedAppointment.userId.name} ${populatedAppointment.userId.surname}`;
+        const userPhone = populatedAppointment.userId.phone;
+        const stylistName = `${populatedAppointment.stylistId.name} ${populatedAppointment.stylistId.surname}`;
+        const stylistPhone = populatedAppointment.stylistId.phone;
+        const stylistChatLink = populatedAppointment.stylistId.chatLink || 'Свяжитесь через сайт';
+
+        // Находим Telegram-пользователей
+        const userTelegram = await TelegramUser.findOne({ userId: userIdFromAppointment });
+        const stylistTelegram = await TelegramUser.findOne({ userId: stylistIdFromAppointment });
+
+        // Формируем ссылку на Telegram пользователя (если он подключён и имеет username)
+        const userChatLink = userTelegram && userTelegram.username ? `https://t.me/${userTelegram.username.replace('@', '')}` : 'Свяжитесь через сайт';
+
+        // Отправляем уведомления пользователю
+        let botLink = null;
+        if (userTelegram) {
+            const userMessage = `Новая запись к стилисту ${stylistName} на ${appointmentDate} в ${appointment.time}.\n📞 Телефон стилиста: ${stylistPhone}\n💬 Связаться: ${stylistChatLink}`;
+            await sendNotification(userTelegram.chatId, userMessage);
+        } else {
+            botLink = 'https://t.me/StylistReminderBot'; // Замените на username вашего бота
+        }
+
+        // Отправляем уведомления стилисту
+        if (stylistTelegram) {
+            const stylistMessage = `Новая запись от клиента ${userName} на ${appointmentDate} в ${appointment.time}.\n📞 Телефон клиента: ${userPhone}\n💬 Связаться: ${userChatLink}`;
+            await sendNotification(stylistTelegram.chatId, stylistMessage);
+        }
+
+        res.status(201).json({
+            appointment: populatedAppointment,
+            botLink: botLink ? botLink : undefined, // Возвращаем ссылку, если пользователь не запустил бота
+        });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

@@ -13,6 +13,8 @@ export default function StylistProfile() {
     const [selectedTime, setSelectedTime] = useState(null);
     const [appointments, setAppointments] = useState([]);
     const [modalType, setModalType] = useState(null);
+    const [showBotModal, setShowBotModal] = useState(false);
+    const [botLink, setBotLink] = useState(null);
     const navigate = useNavigate();
     const { user, isAuthenticated, token } = useSelector((state) => state.auth);
 
@@ -80,6 +82,32 @@ export default function StylistProfile() {
         navigate('/catalog');
     };
 
+    const checkTelegramUser = async () => {
+        try {
+            const response = await fetch('/api/check-telegram-user', {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Не удалось проверить Telegram-пользователя');
+            }
+
+            const data = await response.json();
+            if (!data.isRegistered) {
+                setBotLink(data.botLink);
+                setShowBotModal(true);
+            }
+        } catch (error) {
+            showError(`Ошибка проверки Telegram-пользователя: ${error.message}`);
+            if (error.message.includes('Токен')) {
+                navigate('/');
+            }
+        }
+    };
+
     const handleBookAppointment = async () => {
         if (!isAuthenticated || !user || !user._id) {
             showWarning('Пожалуйста, войдите в систему для записи');
@@ -110,9 +138,15 @@ export default function StylistProfile() {
                 throw new Error(errorData.message || 'Не удалось создать запись');
             }
 
-            const newAppointment = await response.json();
+            const data = await response.json();
+            const newAppointment = data.appointment;
+
             setAppointments([...appointments, newAppointment]);
             showSuccess('Запись успешно создана!');
+
+            // Проверяем, зарегистрирован ли пользователь в Telegram
+            await checkTelegramUser();
+
             setSelectedDate(null);
             setSelectedTime(null);
         } catch (error) {
@@ -183,6 +217,11 @@ export default function StylistProfile() {
 
     const handlePriceClick = () => {
         setModalType('prices');
+    };
+
+    const closeBotModal = () => {
+        setShowBotModal(false);
+        setBotLink(null);
     };
 
     if (!stylist) {
@@ -307,6 +346,24 @@ export default function StylistProfile() {
                 <div className="modal-overlay" onClick={closeModal}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         {modalType === 'prices' && <PriceModal closeModal={closeModal} stylist={stylist} />}
+                    </div>
+                </div>
+            )}
+
+            {showBotModal && (
+                <div className="modal-overlay" onClick={closeBotModal}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="register-cont">
+                            <p>Чтобы получать напоминания о записях, подключите нашего Telegram-бота! 🚀</p>
+                            <a
+                                href={botLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="contact-btn"
+                            >
+                                Подключить бота
+                            </a>
+                        </div>
                     </div>
                 </div>
             )}
