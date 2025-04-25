@@ -1324,7 +1324,7 @@ h1 {
 }
 
 .my-appointment h2 {
-  color: white;
+  color: darkgray;
   font-size: 14px;
   margin: 0;
   text-align: left;
@@ -1379,4 +1379,33 @@ h1 {
 .horizontal-appointment-list .my-appointment {
   min-width: 200px;
   overflow-wrap: break-word;
+}
+
+.profile-cont {
+  margin-top: 50px;
+  overflow: auto;
+  height: calc(100% - 50px);
+}
+
+.user-profile-block {
+  border: none;
+  border-bottom: 1px dashed darkgrey;
+  background-color: transparent;
+  padding: 10px;
+}
+
+.telegram-info {
+  padding: 10px;
+  border-radius: 15px;
+  border: 1px dashed darkgrey;
+}
+
+.profile-info {
+  padding: 10px;
+  border-radius: 15px;
+  border: 1px dashed darkgrey;
+}
+
+.profile-cont-header {
+  margin-bottom: 20px;
 }

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import SignIn from '../components/SignIn';
-import ProfileModal from '../components/ProfileModal';
 
 export default function StylistsCatalog() {
     const [stylists, setStylists] = useState([]);
@@ -86,7 +85,7 @@ export default function StylistsCatalog() {
         if (!isAuthenticated) {
             setModalType('signin');
         } else {
-            setModalType('profile');
+            navigate('/profile'); // Перенаправляем на страницу профиля
         }
     };
 
@@ -156,11 +155,7 @@ export default function StylistsCatalog() {
             {modalType && (
                 <div className="modal-overlay" onClick={closeModal}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        {modalType === 'signin' ? (
-                            <SignIn closeModal={closeModal} switchToRegister={switchToRegister} />
-                        ) : (
-                            <ProfileModal closeModal={closeModal} />
-                        )}
+                        <SignIn closeModal={closeModal} switchToRegister={switchToRegister} />
                     </div>
                 </div>
             )}

@@ -3,6 +3,7 @@ import MainPage from './pages/MainPage.jsx';
 import StylistsCatalog from './pages/StylistsCatalog.jsx';
 import StylistProfile from './pages/StylistProfile.jsx';
 import StylistPortfolio from './pages/StylistPortfolio.jsx';
+import ProfilePage from './pages/ProfilePage.jsx';
 
 function App() {
     return (
@@ -12,6 +13,7 @@ function App() {
                 <Route path="/catalog" element={<StylistsCatalog />} />
                 <Route path="/stylist/:id" element={<StylistProfile />} />
                 <Route path="/stylist/:id/portfolio" element={<StylistPortfolio />} />
+                <Route path="/profile" element={<ProfilePage />} />
             </Routes>
         </Router>
     );

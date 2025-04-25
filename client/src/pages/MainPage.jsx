@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import Register from '../components/Register.jsx';
 import SignIn from '../components/SignIn.jsx';
-import ProfileModal from '../components/ProfileModal.jsx';
 import { useNavigate } from 'react-router-dom';
 
 export default function MainPage() {
@@ -28,7 +27,7 @@ export default function MainPage() {
         if (!isAuthenticated) {
             setModalType('signin');
         } else {
-            setModalType('profile');
+            navigate('/profile'); // Перенаправляем на страницу профиля
         }
     };
 
@@ -89,10 +88,8 @@ export default function MainPage() {
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         {modalType === 'register' ? (
                             <Register closeModal={closeModal} switchToSignIn={switchToSignIn} />
-                        ) : modalType === 'signin' ? (
-                            <SignIn closeModal={closeModal} switchToRegister={switchToRegister} />
                         ) : (
-                            <ProfileModal closeModal={closeModal} />
+                            <SignIn closeModal={closeModal} switchToRegister={switchToRegister} />
                         )}
                     </div>
                 </div>
