@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import SignIn from '../components/SignIn'; // Импортируем SignIn
-import ProfileModal from '../components/ProfileModal'; // Импортируем ProfileModal
+import SignIn from '../components/SignIn';
+import ProfileModal from '../components/ProfileModal';
 
 export default function StylistsCatalog() {
     const [stylists, setStylists] = useState([]);
     const [selectedCity, setSelectedCity] = useState('');
-    const [searchName, setSearchName] = useState(''); // Состояние для поиска по имени
-    const [modalType, setModalType] = useState(null); // Состояние для модального окна
+    const [searchName, setSearchName] = useState('');
+    const [modalType, setModalType] = useState(null);
     const { isAuthenticated, user } = useSelector((state) => state.auth);
     const navigate = useNavigate();
 
@@ -58,7 +58,6 @@ export default function StylistsCatalog() {
 
     const uniqueCities = getUniqueCities();
 
-    // Фильтрация по городу и имени
     const filteredStylists = stylists.filter((stylist) => {
         const matchesCity =
             !selectedCity ||
@@ -83,7 +82,6 @@ export default function StylistsCatalog() {
         navigate(`/stylist/${stylistId}`);
     };
 
-    // Обработчик клика по иконке пользователя
     const handleUserIconClick = () => {
         if (!isAuthenticated) {
             setModalType('signin');
@@ -92,14 +90,13 @@ export default function StylistsCatalog() {
         }
     };
 
-    // Закрытие модального окна
     const closeModal = () => {
         setModalType(null);
     };
 
-    // Переключение на регистрацию
     const switchToRegister = () => {
         setModalType('register');
+        navigate('/'); // Перенаправляем на главную страницу для регистрации
     };
 
     return (
@@ -156,7 +153,6 @@ export default function StylistsCatalog() {
                 ))}
             </div>
 
-            {/* Модальное окно */}
             {modalType && (
                 <div className="modal-overlay" onClick={closeModal}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>

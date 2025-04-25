@@ -7,7 +7,6 @@ import { useNavigate } from 'react-router-dom';
 
 export default function MainPage() {
     const [modalType, setModalType] = useState(null);
-    const [redirectAfterLogin, setRedirectAfterLogin] = useState(false); // Флаг для редиректа
     const [stylists, setStylists] = useState([]);
     const { isAuthenticated, user } = useSelector((state) => state.auth);
     const navigate = useNavigate();
@@ -25,14 +24,6 @@ export default function MainPage() {
         fetchStylists();
     }, []);
 
-    // Проверяем, нужно ли перенаправить после авторизации
-    useEffect(() => {
-        if (isAuthenticated && redirectAfterLogin) {
-            navigate('/catalog');
-            setRedirectAfterLogin(false); // Сбрасываем флаг
-        }
-    }, [isAuthenticated, redirectAfterLogin, navigate]);
-
     const handleUserIconClick = () => {
         if (!isAuthenticated) {
             setModalType('signin');
@@ -42,17 +33,11 @@ export default function MainPage() {
     };
 
     const handleFindClick = () => {
-        if (!isAuthenticated) {
-            setModalType('signin');
-            setRedirectAfterLogin(true); // Устанавливаем флаг для редиректа после авторизации
-        } else {
-            navigate('/catalog');
-        }
+        navigate('/catalog');
     };
 
     const closeModal = () => {
         setModalType(null);
-        setRedirectAfterLogin(false); // Сбрасываем флаг, если модальное окно закрыто
     };
 
     const switchToRegister = () => {

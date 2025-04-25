@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { showSuccess, showError } from '../components/ToastNotifications';
 import PhotoGallery from '../components/PhotoGallery';
+import SignIn from '../components/SignIn';
 
 export default function StylistPortfolio() {
     const { id } = useParams();
@@ -16,6 +17,7 @@ export default function StylistPortfolio() {
     const [previewPhotos, setPreviewPhotos] = useState([]);
     const [editingPost, setEditingPost] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [showSignInModal, setShowSignInModal] = useState(false);
     const { user, isAuthenticated, token } = useSelector((state) => state.auth);
     const navigate = useNavigate();
 
@@ -25,9 +27,7 @@ export default function StylistPortfolio() {
         const fetchStylist = async () => {
             try {
                 const response = await fetch(`/api/stylists/${id}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
                 });
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.message);
@@ -40,9 +40,7 @@ export default function StylistPortfolio() {
         const fetchPosts = async () => {
             try {
                 const response = await fetch(`/api/stylists/${id}/portfolio?search=${searchQuery}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
                 });
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.message);
@@ -92,6 +90,11 @@ export default function StylistPortfolio() {
     };
 
     const handleEditPost = (post) => {
+        if (!isAuthenticated) {
+            setShowSignInModal(true);
+            return;
+        }
+
         setEditingPost(post);
         setNewPost({
             title: post.title,
@@ -102,7 +105,6 @@ export default function StylistPortfolio() {
         setPreviewPhotos(post.photos);
         setIsFormVisible(true);
 
-        // Прокручиваем к форме редактирования
         setTimeout(() => {
             const formElement = document.getElementById('edit-post-form');
             if (formElement) {
@@ -113,8 +115,7 @@ export default function StylistPortfolio() {
 
     const handleDeletePost = async (postId) => {
         if (!isAuthenticated) {
-            showError('Пожалуйста, войдите в систему');
-            navigate('/signin');
+            setShowSignInModal(true);
             return;
         }
 
@@ -122,10 +123,6 @@ export default function StylistPortfolio() {
             showError('Вы не можете удалять посты для этого стилиста');
             return;
         }
-
-        console.log('Token:', token);
-        console.log('User:', user);
-        console.log('Stylist:', stylist);
 
         setIsLoading(true);
         try {
@@ -153,8 +150,7 @@ export default function StylistPortfolio() {
     const handleSubmitPost = async (e) => {
         e.preventDefault();
         if (!isAuthenticated) {
-            showError('Пожалуйста, войдите в систему');
-            navigate('/signin');
+            setShowSignInModal(true);
             return;
         }
 
@@ -220,6 +216,15 @@ export default function StylistPortfolio() {
         setSelectedPhoto(null);
     };
 
+    const closeSignInModal = () => {
+        setShowSignInModal(false);
+    };
+
+    const switchToRegister = () => {
+        setShowSignInModal(false);
+        navigate('/'); // Перенаправляем на главную страницу для регистрации
+    };
+
     if (!stylist) {
         return <div className="main-container">Загрузка...</div>;
     }
@@ -251,7 +256,7 @@ export default function StylistPortfolio() {
                 )}
 
                 {isStylist && isFormVisible && (
-                    <form id="edit-post-form" className="post-form" onSubmit={handleSubmitPost}>
+                    <form id="edit-post-form" className=" establecimiento-post-form" onSubmit={handleSubmitPost}>
                         <input
                             type="text"
                             name="title"
@@ -404,6 +409,14 @@ export default function StylistPortfolio() {
                 <div className="loading-overlay">
                     <div className="loading-content">
                         <img src="/img/load.svg" alt="Загрузка..." className="loading-icon" />
+                    </div>
+                </div>
+            )}
+
+            {showSignInModal && (
+                <div className="modal-overlay" onClick={closeSignInModal}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <SignIn closeModal={closeSignInModal} switchToRegister={switchToRegister} />
                     </div>
                 </div>
             )}

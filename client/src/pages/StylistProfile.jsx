@@ -5,6 +5,7 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { showSuccess, showError, showWarning } from '../components/ToastNotifications';
 import PriceModal from '../components/PriceModal';
+import SignIn from '../components/SignIn';
 
 export default function StylistProfile() {
     const { id } = useParams();
@@ -15,6 +16,7 @@ export default function StylistProfile() {
     const [modalType, setModalType] = useState(null);
     const [showBotModal, setShowBotModal] = useState(false);
     const [botLink, setBotLink] = useState(null);
+    const [showSignInModal, setShowSignInModal] = useState(false); // Новое состояние для модального окна входа
     const navigate = useNavigate();
     const { user, isAuthenticated, token } = useSelector((state) => state.auth);
 
@@ -38,30 +40,22 @@ export default function StylistProfile() {
     useEffect(() => {
         const fetchStylist = async () => {
             try {
-                if (!token) {
-                    throw new Error('Токен отсутствует. Пожалуйста, войдите в систему.');
-                }
-
                 const response = await fetch(`/api/stylists/${id}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
                 });
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.message || 'Не удалось загрузить данные стилиста');
                 setStylist(data);
             } catch (error) {
                 showError(`Ошибка загрузки стилиста: ${error.message}`);
-                if (error.message.includes('Токен')) {
-                    navigate('/');
-                }
             }
         };
 
         const fetchAppointments = async () => {
             try {
-                if (!token) {
-                    throw new Error('Токен отсутствует. Пожалуйста, войдите в систему.');
+                if (!isAuthenticated || !token) {
+                    setAppointments([]); // Если пользователь не авторизован, не загружаем записи
+                    return;
                 }
 
                 const response = await fetch(`/api/stylists/${id}/appointments`, {
@@ -74,15 +68,12 @@ export default function StylistProfile() {
                 setAppointments(data);
             } catch (error) {
                 showError(`Ошибка загрузки записей: ${error.message}`);
-                if (error.message.includes('Токен')) {
-                    navigate('/');
-                }
             }
         };
 
         fetchStylist();
         fetchAppointments();
-    }, [id, token, navigate]);
+    }, [id, token, isAuthenticated]);
 
     const handleDateChange = (date) => {
         setSelectedDate(date);
@@ -117,16 +108,12 @@ export default function StylistProfile() {
             }
         } catch (error) {
             showError(`Ошибка проверки Telegram-пользователя: ${error.message}`);
-            if (error.message.includes('Токен')) {
-                navigate('/');
-            }
         }
     };
 
     const handleBookAppointment = async () => {
         if (!isAuthenticated || !user || !user._id) {
-            showWarning('Пожалуйста, войдите в систему для записи');
-            navigate('/');
+            setShowSignInModal(true); // Открываем модальное окно входа
             return;
         }
 
@@ -165,9 +152,6 @@ export default function StylistProfile() {
             setSelectedTime(null);
         } catch (error) {
             showError(`Ошибка при записи: ${error.message}`);
-            if (error.message.includes('Токен')) {
-                navigate('/');
-            }
         }
     };
 
@@ -194,9 +178,6 @@ export default function StylistProfile() {
             showSuccess('Запись успешно отменена!');
         } catch (error) {
             showError(`Ошибка при отмене записи: ${error.message}`);
-            if (error.message.includes('Токен')) {
-                navigate('/');
-            }
         }
     };
 
@@ -227,9 +208,6 @@ export default function StylistProfile() {
             showSuccess('Запись успешно подтверждена!');
         } catch (error) {
             showError(`Ошибка при подтверждении записи: ${error.message}`);
-            if (error.message.includes('Токен')) {
-                navigate('/');
-            }
         }
     };
 
@@ -273,6 +251,15 @@ export default function StylistProfile() {
     const closeBotModal = () => {
         setShowBotModal(false);
         setBotLink(null);
+    };
+
+    const closeSignInModal = () => {
+        setShowSignInModal(false);
+    };
+
+    const switchToRegister = () => {
+        setShowSignInModal(false);
+        navigate('/'); // Перенаправляем на главную страницу, где можно открыть регистрацию
     };
 
     if (!stylist) {
@@ -426,6 +413,14 @@ export default function StylistProfile() {
                                 Подключить бота
                             </a>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {showSignInModal && (
+                <div className="modal-overlay" onClick={closeSignInModal}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <SignIn closeModal={closeSignInModal} switchToRegister={switchToRegister} />
                     </div>
                 </div>
             )}
