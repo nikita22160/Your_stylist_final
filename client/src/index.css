@@ -503,11 +503,12 @@ h1 {
 
 .appointment {
   margin-top: 10px;
-  padding: 10px;
+  padding: 10px 40px;
   border-radius: 15px;
   border: 1px dashed darkgray;
   width: 100%;
   box-sizing: border-box;
+  position: relative; /* Добавляем position relative для позиционирования стрелок */
 }
 
 .appointment-calendar {
@@ -1408,4 +1409,29 @@ h1 {
 
 .profile-cont-header {
   margin-bottom: 20px;
+}
+
+.stylist-rating {
+  margin: 10px 0;
+}
+
+.stylist-rating h2 {
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+
+.stylist-rating div {
+  display: flex;
+  justify-content: center; /* Центрируем звёзды */
+  align-items: center;
+}
+
+.stylist-rating p {
+  font-size: 16px;
+}
+
+.star-rating {
+  display: flex;
+  justify-content: center; /* Центрируем звёзды */
+  gap: 5px;
 }

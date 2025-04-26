@@ -4,6 +4,7 @@ const userRoutes = require('./routes/userRoutes');
 const stylistRoutes = require('./routes/stylistRoutes');
 const authRoutes = require('./routes/authRoutes');
 const postRoutes = require('./routes/portfolioRoutes');
+const reviewRoutes = require('./routes/reviewRoutes'); // Добавляем новые маршруты
 const dotenv = require('dotenv');
 const cloudinary = require('cloudinary').v2;
 const cron = require('node-cron');
@@ -33,13 +34,14 @@ app.use('/api', userRoutes);
 app.use('/api', stylistRoutes);
 app.use('/api', authRoutes);
 app.use('/api', postRoutes);
+app.use('/api', reviewRoutes); // Подключаем маршруты для отзывов
 
 app.get('/', (req, res) => {
     res.send('Welcome to the Stylist API');
 });
 
 // Планировщик задач для напоминаний за день
-cron.schedule('0 0 * * *', async () => { // Запускается каждый день в 00:00
+cron.schedule('0 0 * * *', async () => {
     try {
         const now = new Date();
         const tomorrow = new Date(now);
@@ -54,7 +56,7 @@ cron.schedule('0 0 * * *', async () => { // Запускается каждый 
                 $gte: tomorrow,
                 $lte: tomorrowEnd,
             },
-            status: 'Подтверждена', // Только подтверждённые записи
+            status: 'Подтверждена',
         }).populate('userId').populate('stylistId');
 
         for (const appointment of appointments) {
@@ -73,7 +75,7 @@ cron.schedule('0 0 * * *', async () => { // Запускается каждый 
             const userTelegram = await TelegramUser.findOne({ userId });
             const stylistTelegram = await TelegramUser.findOne({ userId: stylistId });
 
-            // Формируем ссылку на Telegram пользователя (если он подключён и имеет username)
+            // Формируем ссылку на Telegram пользователя
             const userChatLink = userTelegram && userTelegram.username ? `https://t.me/${userTelegram.username.replace('@', '')}` : 'Свяжитесь через сайт';
 
             // Отправляем уведомления пользователю

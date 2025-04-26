@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import { showSuccess, showError, showWarning } from '../components/ToastNotifications';
+import { showSuccess, showError } from '../components/ToastNotifications';
 import PriceModal from '../components/PriceModal';
 import SignIn from '../components/SignIn';
 
@@ -16,21 +16,20 @@ export default function StylistProfile() {
     const [modalType, setModalType] = useState(null);
     const [showBotModal, setShowBotModal] = useState(false);
     const [botLink, setBotLink] = useState(null);
-    const [showSignInModal, setShowSignInModal] = useState(false); // Новое состояние для модального окна входа
+    const [showSignInModal, setShowSignInModal] = useState(false);
+    const [averageRating, setAverageRating] = useState(0);
+    const [hasReviews, setHasReviews] = useState(false);
     const navigate = useNavigate();
     const { user, isAuthenticated, token } = useSelector((state) => state.auth);
 
-    // Функция для нормализации номера телефона
     const normalizePhone = (phone) => {
         if (!phone) return '';
         const digits = phone.replace(/\D/g, '');
         return digits.startsWith('+') ? digits : `+${digits}`;
     };
 
-    // Проверяем, является ли пользователь стилистом
     const isStylist = isAuthenticated && user && stylist && user.role === 'stylist' && normalizePhone(stylist.phone) === normalizePhone(user.phone);
 
-    // Логируем для отладки
     useEffect(() => {
         console.log('User from Redux:', user);
         console.log('Stylist:', stylist);
@@ -54,7 +53,7 @@ export default function StylistProfile() {
         const fetchAppointments = async () => {
             try {
                 if (!isAuthenticated || !token) {
-                    setAppointments([]); // Если пользователь не авторизован, не загружаем записи
+                    setAppointments([]);
                     return;
                 }
 
@@ -71,8 +70,31 @@ export default function StylistProfile() {
             }
         };
 
+        const fetchReviews = async () => {
+            try {
+                const response = await fetch(`/api/stylists/${id}/reviews`, {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Не удалось загрузить отзывы');
+
+                if (data.length > 0) {
+                    const totalRating = data.reduce((sum, review) => sum + review.rating, 0);
+                    const avgRating = (totalRating / data.length).toFixed(1);
+                    setAverageRating(avgRating);
+                    setHasReviews(true);
+                } else {
+                    setAverageRating(0);
+                    setHasReviews(false);
+                }
+            } catch (error) {
+                showError(`Ошибка загрузки отзывов: ${error.message}`);
+            }
+        };
+
         fetchStylist();
         fetchAppointments();
+        fetchReviews();
     }, [id, token, isAuthenticated]);
 
     const handleDateChange = (date) => {
@@ -113,7 +135,7 @@ export default function StylistProfile() {
 
     const handleBookAppointment = async () => {
         if (!isAuthenticated || !user || !user._id) {
-            setShowSignInModal(true); // Открываем модальное окно входа
+            setShowSignInModal(true);
             return;
         }
 
@@ -211,6 +233,15 @@ export default function StylistProfile() {
         }
     };
 
+    const canLeaveReview = (appt) => {
+        const appointmentDateTime = new Date(appt.date);
+        const [hours, minutes] = appt.time.split(':').map(Number);
+        appointmentDateTime.setHours(hours, minutes, 0, 0);
+
+        const now = new Date();
+        return appt.status === 'Подтверждена' && now > appointmentDateTime;
+    };
+
     const availableHours = Array.from({ length: 10 }, (_, i) => {
         const hour = 10 + i;
         return `${hour}:00`;
@@ -259,7 +290,7 @@ export default function StylistProfile() {
 
     const switchToRegister = () => {
         setShowSignInModal(false);
-        navigate('/'); // Перенаправляем на главную страницу, где можно открыть регистрацию
+        navigate('/');
     };
 
     if (!stylist) {
@@ -286,6 +317,17 @@ export default function StylistProfile() {
                             </div>
                         </div>
                         <div className="city-stylist">
+                            <h2>Рейтинг</h2>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                <img
+                                    src={hasReviews ? '/img/star-fill.svg' : '/img/star.svg'}
+                                    alt="Star"
+                                    style={{ width: '24px', height: '24px' }}
+                                />
+                                <p>{hasReviews ? `(${averageRating}/5)` : 'отзывов нет'}</p>
+                            </div>
+                        </div>
+                        <div className="city-stylist">
                             <h2>Город</h2>
                             <p>{stylist.city}</p>
                         </div>
@@ -308,34 +350,42 @@ export default function StylistProfile() {
                         {isStylist ? (
                             <div className="appointment">
                                 <h2>Мои записи</h2>
-                                <div className="my-appointment-list">
+                                <div className="horizontal-appointment-list">
                                     {appointments.length > 0 ? (
                                         appointments.map((appt) => (
                                             <div key={appt._id} className="my-appointment">
-                                                <p>{new Date(appt.date).toLocaleDateString('ru-RU')} в {appt.time}</p>
-                                                <p>
-                                                    {appt.userId?.name && appt.userId?.surname
-                                                        ? `${appt.userId.name} ${appt.userId.surname}`
-                                                        : 'Клиент не указан'}
+                                                <p style={{ textAlign: 'center' }}>
+                                                    {new Date(appt.date).toLocaleDateString('ru-RU')} в {appt.time}
                                                 </p>
-                                                <p>{appt.userId?.phone || 'Телефон не указан'}</p>
-                                                <p>Статус: {appt.status}</p>
-                                                <div style={{ display: 'flex', gap: '10px' }}>
-                                                    <div
-                                                        className="remove-appointment"
-                                                        onClick={() => handleCancelAppointment(appt._id)}
-                                                    >
-                                                        отменить
-                                                    </div>
-                                                    {appt.status === 'В ожидании' && (
-                                                        <div
-                                                            className="confirm-appointment"
-                                                            onClick={() => handleConfirmAppointment(appt._id)}
-                                                        >
-                                                            подтвердить
-                                                        </div>
-                                                    )}
+                                                <div>
+                                                    <h2>Клиент</h2>
+                                                    <p>
+                                                        {appt.userId?.name && appt.userId?.surname
+                                                            ? `${appt.userId.name} ${appt.userId.surname}`
+                                                            : 'Клиент не указан'}
+                                                    </p>
+                                                    <p>Телефон: {appt.userId?.phone || 'Не указан'}</p>
                                                 </div>
+                                                <h2>Статус</h2>
+                                                <p>{appt.status}</p>
+                                                {!canLeaveReview(appt) && (
+                                                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '10px' }}>
+                                                        <div
+                                                            className="remove-appointment"
+                                                            onClick={() => handleCancelAppointment(appt._id)}
+                                                        >
+                                                            отменить
+                                                        </div>
+                                                        {appt.status === 'В ожидании' && (
+                                                            <div
+                                                                className="confirm-appointment"
+                                                                onClick={() => handleConfirmAppointment(appt._id)}
+                                                            >
+                                                                подтвердить
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
                                         ))
                                     ) : (
