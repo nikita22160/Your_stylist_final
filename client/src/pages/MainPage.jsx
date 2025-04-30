@@ -83,6 +83,10 @@ export default function MainPage() {
                 <img src="/img/Arrow.svg" alt="Arrow" />
             </div>
 
+            <div onClick={() => navigate('/approves')}>
+                пользовательское соглашение
+            </div>
+
             {modalType && (
                 <div className="modal-overlay" onClick={closeModal}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>

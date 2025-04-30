@@ -43,8 +43,7 @@ router.get('/check-telegram-user', authMiddleware, async (req, res) => {
         const telegramUser = await TelegramUser.findOne({ userId });
 
         if (!telegramUser) {
-            // Здесь должна быть логика генерации ссылки на бота, например:
-            const botLink = `https://t.me/YourStylistBot?start=${userId}`; // Пример ссылки
+            const botLink = `https://t.me/yout_stylist_bot?start=${userId}`;
             return res.json({ isRegistered: false, botLink });
         }
 

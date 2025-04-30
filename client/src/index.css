@@ -1435,3 +1435,13 @@ h1 {
   justify-content: center; /* Центрируем звёзды */
   gap: 5px;
 }
+
+.user-approve-cont {
+  margin-top: 30px;
+  height: 95%;
+  overflow: scroll;
+}
+
+.user-approve-cont h3 {
+  margin-top: 20px;
+}
