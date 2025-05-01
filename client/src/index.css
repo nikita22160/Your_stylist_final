@@ -1445,3 +1445,10 @@ h1 {
 .user-approve-cont h3 {
   margin-top: 20px;
 }
+
+.user-approve-btn {
+  position: absolute;
+  bottom: 20px;
+  text-decoration: underline;
+  cursor: pointer;
+}

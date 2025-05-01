@@ -83,7 +83,7 @@ export default function MainPage() {
                 <img src="/img/Arrow.svg" alt="Arrow" />
             </div>
 
-            <div onClick={() => navigate('/approves')}>
+            <div onClick={() => navigate('/approves')} className='user-approve-btn'>
                 пользовательское соглашение
             </div>
 

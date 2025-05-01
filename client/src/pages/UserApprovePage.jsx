@@ -25,22 +25,16 @@ export default function UserApprovePage() {
         navigate('/'); // Перенаправляем на главную страницу для регистрации
     };
 
+    const handleBackToCatalog = () => {
+        navigate('/catalog');
+    };
+
     return (
         <div className="main-container">
-            <div className="user-cont">
-                {isAuthenticated && user?.name && <div className="user-name">{user.name}</div>}
-                <div className="user-logo-cont" onClick={handleUserIconClick}>
-                    <img
-                        src="/img/User_Circle.svg"
-                        alt="User Icon"
-                        style={{ cursor: 'pointer' }}
-                        width={50}
-                        height={50}
-                    />
-                </div>
+            <div onClick={handleBackToCatalog} className="back-btn">
+                <img src="/img/back.svg" alt="Назад" />
             </div>
-
-            <div className="catalog-header" onClick={() => navigate('/')}>
+            <div className="stylist-page-header" onClick={() => navigate('/')}>
                 ТВОЙ СТИЛИСТ
             </div>
 
