@@ -1452,3 +1452,1624 @@ h1 {
   text-decoration: underline;
   cursor: pointer;
 }
+
+.service-selection {
+  margin-top: 20px;
+}
+.service-list {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.service-slot {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.service-slot.selected {
+  background-color: #007bff;
+  color: white;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content.payment-modal {
+  width: 95vw;
+  height: 95vh;
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  overflow: auto;
+}
+
+.register-cont {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.register-cont h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.register-cont p {
+  font-size: 16px;
+  text-align: center;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  -webkit-user-select: none; /* Chrome/Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
+  user-select: none; /* Стандартный синтаксис */
+  scrollbar-width: none;
+  font-family: SF-Pro-Display-Thin, sans-serif;
+}
+
+@font-face {
+  font-family: "SF-Pro-Display-Thin";
+  src: local("SF-Pro-Display-Thin"),
+  url("../public/fonts/SF-Pro-Display-Thin.otf") format("truetype");
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: "Lepka";
+  src: local("Lepka"), url("../public/fonts/LEPKA.otf") format("truetype");
+  font-weight: normal;
+}
+
+.main-container {
+  overflow: hidden; /* Запрещаем прокрутку на уровне main-container */
+  position: relative;
+  height: calc(100vh - 60px);
+  padding: 30px 50px;
+  background: linear-gradient(
+          53.661deg,
+          rgba(255, 255, 255, 0%) 0%,
+          rgba(252, 224, 255, 30%) 50%
+  ),
+  linear-gradient(-122.244deg, #ffffff 0%, rgba(252, 224, 255, 10%) 100%);
+}
+
+@media screen and (max-width: 600px) {
+  .main-container {
+    overflow: hidden;
+    position: relative;
+    height: calc(100vh - 60px);
+    padding: 30px 10px;
+    background: linear-gradient(
+            53.661deg,
+            rgba(255, 255, 255, 0%) 0%,
+            rgba(252, 224, 255, 30%) 50%
+    ),
+    linear-gradient(-122.244deg, #ffffff 0%, rgba(252, 224, 255, 10%) 100%);
+  }
+}
+
+.bg-img {
+  position: absolute;
+  bottom: -20vh;
+  right: -20vw;
+  scale: 1;
+  transition: scale 1s;
+  z-index: -1;
+}
+
+.bg-img:hover {
+  scale: 1.01;
+}
+
+.user-name {
+  font-size: 32px;
+}
+
+.user-logo-cont {
+  transition: 0.3s;
+}
+
+h1 {
+  z-index: 1;
+}
+
+@media screen and (min-width: 700px) {
+  h1 {
+    font-family: "Lepka", sans-serif;
+    font-size: 128px;
+    margin-top: 100px;
+    color: transparent;
+    -webkit-text-stroke: 0.01px black;
+  }
+  .user-cont {
+    position: absolute;
+    right: 70px;
+    top: 30px;
+  }
+  .bg-img {
+    width: 800px;
+  }
+}
+
+@media screen and (min-width: 300px) and (max-width: 700px) {
+  h1 {
+    font-family: "Lepka", sans-serif;
+    font-size: 64px;
+    margin-top: 100px;
+    color: transparent;
+    -webkit-text-stroke: 0.01px black;
+  }
+  .user-cont {
+    position: absolute;
+    right: 20px;
+    top: 50px;
+  }
+  .bg-img {
+    width: 500px;
+  }
+}
+
+.user-cont {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-logo-cont:hover {
+  scale: 1.1;
+}
+
+/* Стили для модального окна */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  backdrop-filter: blur(5px);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.modal-content {
+  background: transparent;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90%;
+  animation: slideIn 0.3s ease-in-out;
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+/* Переопределение стилей для модального окна оплаты */
+.modal-content.payment-modal {
+  width: 95vw;
+  height: 95vh;
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  overflow: auto;
+}
+
+/* Стили для содержимого модального окна оплаты */
+.payment-modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(20px);
+  border-radius: 15px;
+  width: 40vw;
+  min-width: 250px;
+  max-width: 350px;
+  padding: 20px 40px;
+  box-shadow: 0 4px 15px 4px rgba(0, 0, 0, 0.25);
+}
+
+.payment-modal-content h2 {
+  font-family: 'SF-Pro-Display-Thin', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.payment-modal-content p {
+  font-family: 'SF-Pro-Display-Thin', sans-serif;
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Обновление стилей для кнопок */
+.confirm-appointment {
+  color: black;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 15px;
+  font-family: 'SF-Pro-Display-Thin', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.remove-appointment {
+  background: transparent;
+  color: #f34040;
+  padding: 10px 20px;
+  border: 1px dashed #f34040;
+  border-radius: 15px;
+  font-family: 'SF-Pro-Display-Thin', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.remove-appointment:hover {
+  background: rgba(243, 64, 64, 0.1);
+}
+
+.register-cont {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(20px);
+  border-radius: 15px;
+  width: 40vw;
+  min-width: 250px;
+  max-width: 350px;
+  padding: 20px 40px;
+  box-shadow: 0 4px 15px 4px rgba(0, 0, 0, 0.25);
+}
+
+.register-cont p{
+  font-size: 20px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.register-cont input {
+  background: transparent;
+  padding: 8px;
+  border: none;
+  border-bottom: 1px solid black;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 24px;
+}
+
+.register-cont input:focus {
+  outline: none;
+}
+
+.button-cont {
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.submit-btn {
+  padding: 5px 10px;
+  background: rgba(255, 255, 255, 0.7);
+  color: black;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 24px;
+  transition: 0.3s;
+  line-height: 100%;
+  text-align: center;
+}
+
+.submit-btn:hover {
+  background: rgba(255, 255, 255, 1);
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #ff4444;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  background: #cc0000;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.register-header {
+  font-size: 40px;
+  margin-bottom: 40px;
+}
+
+.enter-btn-cont {
+  display: flex;
+  justify-content: center;
+}
+
+.enter-btn {
+  color: white;
+  font-size: 32px;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.enter-btn:hover {
+  color: black;
+}
+
+.find-btn-cont {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.find-btn {
+  font-size: 40px;
+  background: white;
+  border-radius: 15px;
+  padding: 5px 10px;
+  box-shadow: 0 4px 40px 0 rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.find-btn:hover {
+  box-shadow: 0 4px 40px 0 rgba(0, 0, 0, 0.1);
+}
+
+.gallery {
+  position: absolute;
+  z-index: -1;
+  display: flex;
+  gap: 10px;
+  rotate: -25deg;
+  top: -120%;
+  left: 0;
+  width: max-content;
+  transform: translateY(-70%);
+  animation: scrollRight 100s infinite linear;
+}
+
+.card {
+  width: 200px;
+  height: 250px;
+  border-radius: 10px;
+  background: #d9d9d9;
+  flex-shrink: 0;
+}
+
+@keyframes scrollRight {
+  0% {
+    transform: translateX(-10%) translateY(-70%);
+  }
+  100% {
+    transform: translateX(-75%) translateY(-70%);
+  }
+}
+
+.catalog-header {
+  font-size: 32px;
+  font-family: "Lepka", sans-serif;
+  scale: 1;
+  transition: 0.5s;
+  display: flex;
+  width: fit-content;
+}
+
+.catalog-header:hover {
+  cursor: pointer;
+  scale: 1.01;
+}
+
+/* Стили для фильтра */
+.filter-cont {
+  margin-top: 50px;
+  display: flex;
+  gap: 20px;
+}
+
+.filter-cont select {
+  padding: 8px 16px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.filter-cont select:focus {
+  outline: none;
+  border-color: #000;
+}
+
+/* Стили для карточек стилистов */
+.cards-cont {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 30px;
+  gap: 20px;
+  overflow-y: scroll;
+  height: 70%;
+}
+
+.stylist-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px dashed darkgray;
+  border-radius: 15px;
+  padding: 5px;
+  height: fit-content;
+}
+
+.stylist-name {
+  font-size: 20px;
+  margin-top: 10px;
+  margin-bottom: 0;
+  text-align: center;
+}
+
+@media screen and (max-width: 600px) {
+  .cards-cont {
+    justify-content: center;
+  }
+
+  .filter-cont {
+    display: flex;
+    justify-content: center;
+  }
+}
+
+.user-logo-cont-catalog {
+  width: 70px;
+  height: 70px;
+  cursor: pointer;
+}
+
+.user-cont-catalog {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 10px;
+}
+
+.stylist-info-cont {
+  margin-top: 40px;
+  height: 90%;
+  width: 100%;
+  overflow-y: auto; /* Используем auto вместо scroll */
+  overflow-x: hidden; /* Запрещаем горизонтальную прокрутку на этом уровне */
+}
+
+.stylist-main-info {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.stylist-photo-name {
+  padding: 5px;
+  border: 1px dashed darkgray;
+  border-radius: 15px;
+  width: fit-content;
+  height: fit-content;
+}
+
+.stylist-photo {
+  width: 200px;
+  height: 200px;
+  border-radius: 10px;
+  overflow: hidden;
+  object-fit: fill;
+}
+
+.stylist-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.stylist-description {
+  padding: 10px;
+  border-radius: 15px;
+  border: 1px dashed darkgray;
+  height: fit-content;
+}
+
+.stylist-description h2 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.stylist-description p {
+  font-size: 20px;
+  font-weight: 400;
+  margin-top: 15px;
+  white-space: pre-wrap;
+}
+
+@media screen and (max-width: 840px) {
+  .stylist-main-info {
+    display: block;
+  }
+
+  .stylist-description {
+    margin-top: 10px;
+  }
+
+  .stylist-photo-name {
+    margin: 0 auto;
+  }
+}
+
+.back-btn {
+  cursor: pointer;
+  width: fit-content;
+  transition: 0.3s;
+}
+
+.back-btn:hover {
+  scale: 1.1;
+}
+
+.contact-btn {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  align-items: center;
+  cursor: pointer;
+  background: white;
+  box-shadow: 4px 4px 10px 0 rgba(0, 0, 0, 0.1);
+  transition: 0.3s;
+  text-decoration: none;
+  color: black;
+}
+
+.contact-btn:hover {
+  font-size: 18px;
+}
+
+.appointment {
+  margin-top: 10px;
+  padding: 10px 40px;
+  border-radius: 15px;
+  border: 1px dashed darkgray;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative; /* Добавляем position relative для позиционирования стрелок */
+}
+
+.appointment-calendar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 60px;
+  justify-content: center;
+}
+
+.appointment-calendar p {
+  font-size: 20px;
+}
+
+.appointment h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.stylist-page-header {
+  position: absolute;
+  width: fit-content;
+  top: 30px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  font-family: "Lepka", sans-serif;
+  font-size: 32px;
+  color: transparent;
+  -webkit-text-stroke: 1px black;
+  cursor: pointer;
+  transition: 0.5s;
+}
+
+.stylist-page-header:hover {
+  -webkit-text-stroke: 0 transparent;
+  color: black;
+}
+
+.react-calendar {
+  background: rgba(255, 255, 255, 0.3) !important;
+  font-family: SF-Pro-Display-Thin, sans-serif !important;
+  border-radius: 15px;
+  width: 250px;
+}
+
+.react-calendar__navigation__label__labelText
+.react-calendar__navigation__label__labelText--from {
+  font-family: SF-Pro-Display-Thin, sans-serif !important;
+}
+
+.react-calendar__navigation__arrow .react-calendar__navigation__next2-button {
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.react-calendar__navigation {
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  overflow: hidden;
+}
+
+.react-calendar__viewContainer {
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+  overflow: hidden;
+}
+
+.city-stylist {
+  padding: 10px;
+  border-radius: 15px;
+  border: 1px dashed darkgray;
+  margin-top: 10px;
+}
+
+.city-stylist h2 {
+  font-size: 16px;
+}
+
+.time-selection {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  overflow-x: visible;
+  width: 200px !important;
+}
+
+.time-selection h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.time-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 280px;
+  overflow: auto;
+  width: 200px;
+}
+
+.time-slot {
+  padding: 8px 12px;
+  border: 1px dashed darkgray;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.3);
+  transition: 0.3s;
+  text-align: center;
+  overflow-x: visible;
+}
+
+.time-slot:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.time-slot.selected {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid darkgray;
+  font-weight: 600;
+}
+
+.name-find {
+  border: none;
+  outline: none;
+  background: transparent;
+  border-bottom: 1px solid darkgray;
+  padding: 5px 0;
+  font-size: 16px;
+  line-height: 120%;
+  width: 200px;
+}
+
+.user-profile-block {
+  border-bottom: 2px dashed rgba(255, 255, 255, 0.7);
+  margin-bottom: 15px;
+  font-size: 24px;
+}
+
+.user-profile-block-head {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.logout-btn {
+  color: #f34040;
+  font-size: 20px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.remove-appointment {
+  color: #f34040;
+  width: fit-content;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 5px;
+  border: 1px dashed #f34040;
+  border-radius: 15px;
+  margin: 5px auto auto;
+}
+
+.confirm-appointment {
+  color: green;
+  width: fit-content;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 5px;
+  border: 1px dashed green;
+  border-radius: 15px;
+  margin: 5px auto auto;
+  background: transparent;
+}
+
+/* Контейнер для содержимого уведомления */
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Общие стили для всех уведомлений */
+.Toastify__toast {
+  border-radius: 12px;
+  opacity: 0.9;
+  padding: 10px 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
+}
+
+/* Стили для успешных уведомлений */
+.toast-success {
+  background-color: #e6f4ea;
+  color: #155724;
+}
+
+/* Стили для ошибок */
+.toast-error {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Стили для предупреждений */
+.toast-warning {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+/* Переопределяем стандартные стили ToastContainer */
+.Toastify__toast-container {
+  width: 320px;
+  top: 20px;
+}
+
+/* Плавное появление и исчезновение */
+.Toastify__toast--enter {
+  transform: translateY(-100%);
+}
+
+.Toastify__toast--enter-active {
+  transform: translateY(0);
+  transition: transform 0.3s ease-in-out;
+}
+
+.Toastify__toast--exit {
+  transform: translateY(0);
+}
+
+.Toastify__toast--exit-active {
+  transform: translateY(-100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Стили для кнопки закрытия */
+.Toastify__close-button {
+  color: #666;
+  opacity: 0.7;
+}
+
+.Toastify__close-button:hover {
+  opacity: 1;
+}
+
+.portfolio-cont {
+  margin-top: 50px;
+  height: 90%;
+  overflow-y: scroll;
+}
+
+.portfolio-cont h2 {
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.search-cont {
+  margin-bottom: 20px;
+}
+
+.post-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px dashed darkgray;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.post-form input,
+.post-form textarea {
+  padding: 8px;
+  border: 1px solid darkgray;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+.post-form textarea {
+  padding: 8px;
+  border: 1px solid darkgray;
+  border-radius: 10px;
+  font-size: 16px;
+  min-height: 100px;
+  resize: none;
+  overflow: scroll;
+  height: 250px;
+}
+
+.posts-cont {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.portfolio-post {
+  padding: 15px;
+  border: 1px dashed darkgray;
+  border-radius: 15px;
+  position: relative;
+}
+
+.portfolio-post h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.portfolio-post p {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.hashtags {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.photo-gallery {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  overflow: hidden;
+  height: 100%;
+}
+
+.gallery-photos {
+  display: flex;
+  gap: 10px;
+  transition: transform 0.3s ease;
+  width: 100%;
+  touch-action: pan-y;
+  user-select: auto;
+}
+
+.gallery-photo {
+  object-fit: cover;
+  border-radius: 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.photo-modal {
+  background: transparent;
+  max-width: 90%;
+  max-height: 90%;
+}
+
+.zoomed-photo {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+}
+
+.calendar-block {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Стили для кнопки "Новый пост" */
+.new-post-btn {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  align-items: center;
+  cursor: pointer;
+  background: white;
+  box-shadow: 4px 4px 10px 0 rgba(0, 0, 0, 0.1);
+  transition: 0.3s;
+  border: none;
+  outline: none;
+  margin-bottom: 20px;
+}
+
+.new-post-btn:hover {
+  font-size: 18px;
+}
+
+/* Контейнер для хэштегов */
+.hashtags-input-cont {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Стили для инпута хэштегов */
+.hashtag-input {
+  padding: 8px 15px;
+  border: 1px solid darkgray;
+  border-radius: 50px; /* Закруглённые края на 50% */
+  font-size: 14px;
+  outline: none;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.hashtag-input:focus {
+  border-color: #4caf50;
+}
+
+/* Стили для списка хэштегов */
+.hashtags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Стили для каждого хэштега */
+.hashtag-item {
+  display: flex;
+  align-items: center;
+  background-color: #e0e0e0;
+  padding: 5px 10px;
+  border-radius: 50px; /* Закруглённые края на 50% */
+  font-size: 14px;
+  gap: 5px;
+}
+
+/* Кнопка удаления хэштега */
+.remove-hashtag-btn {
+  background: none;
+  border: none;
+  color: #ff4444;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.remove-hashtag-btn:hover {
+  color: #cc0000;
+}
+
+/* Стили для хэштегов в постах */
+.hashtags .hashtag-item {
+  display: inline-flex;
+  background-color: #e0e0e0;
+  padding: 5px 10px;
+  border-radius: 50px; /* Закруглённые края на 50% */
+  margin-right: 5px;
+  margin-bottom: 5px;
+}
+
+/* Стили для кнопок формы */
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.cancel-btn {
+  background-color: transparent;
+  border: none;
+  outline: none;
+  color: red;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.photo-gallery {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  overflow: hidden;
+}
+
+.gallery-photos {
+  display: flex;
+  transition: transform 0.3s ease;
+  touch-action: pan-y;
+  user-select: auto;
+}
+
+.gallery-photo {
+  width: 335px;
+  object-fit: cover;
+  border-radius: 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.gallery-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.7);
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  font-size: 20px;
+  border-radius: 50%;
+}
+
+.left-arrow {
+  left: 10px;
+}
+
+.right-arrow {
+  right: 10px;
+}
+
+.photo-previews {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.photo-preview-cont {
+  position: relative;
+  width: 100px;
+  height: 100px;
+}
+
+.photo-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.remove-photo-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.remove-photo-btn:hover {
+  background: #cc0000;
+}
+
+.attach-photo-btn {
+  background: white;
+  border: none;
+  outline: none;
+  box-shadow: 4px 4px 10px 0 rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px;
+  border-radius: 50px;
+  cursor: pointer;
+}
+
+.add-post-btn {
+  background: white;
+  border: none;
+  outline: none;
+  box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.1);
+  padding: 5px 10px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.edit-post-btn {
+  border: none;
+  outline: none;
+  background: transparent;
+  color: grey;
+  cursor: pointer;
+
+  position: absolute;
+  top: 10px;
+  right: 40px;
+}
+
+.delete-post-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 20px;
+  border-radius: 15px;
+}
+
+.loading-icon {
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.post-content {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.post-gallery {
+  flex: 1;
+  max-width: 420px;
+}
+
+.post-info {
+  flex: 2;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.post-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.edit-post-btn,
+.delete-post-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.edit-post-btn img,
+.delete-post-btn img {
+  width: 20px;
+  height: 20px;
+}
+
+/* Адаптация для маленьких экранов */
+@media screen and (max-width: 768px) {
+  .post-content {
+    flex-direction: column;
+  }
+
+  .post-gallery {
+    width: 100%;
+  }
+
+  .post-info {
+    width: 100%;
+  }
+
+  .post-actions {
+    justify-content: flex-end;
+  }
+}
+
+.post-content {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.post-gallery {
+  flex: 1;
+  max-width: 375px;
+  height: 375px;
+}
+
+.post-info {
+  flex: 2;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.post-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.edit-post-btn,
+.delete-post-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.edit-post-btn img,
+.delete-post-btn img {
+  width: 20px;
+  height: 20px;
+}
+
+.photo-gallery {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 375px;
+  height: 375px;
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.gallery-photos {
+  display: flex;
+  transition: transform 0.3s ease;
+  height: 100%;
+  touch-action: pan-y;
+  user-select: auto;
+}
+
+.gallery-photo {
+  width: 335px;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.gallery-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.7);
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  font-size: 20px;
+  border-radius: 50%;
+  z-index: 10;
+}
+
+.left-arrow {
+  left: 10px;
+}
+
+.right-arrow {
+  right: 10px;
+}
+
+/* Адаптация для маленьких экранов */
+@media screen and (max-width: 768px) {
+  .post-content {
+    flex-direction: column;
+  }
+
+  .post-gallery {
+    width: 100%;
+  }
+
+  .post-info {
+    width: 100%;
+  }
+
+  .post-actions {
+    justify-content: flex-end;
+  }
+}
+
+.my-appointment {
+  padding: 10px 20px;
+  border: 1px solid darkgrey;
+  min-width: 140px;
+  border-radius: 10px;
+  font-size: 16px;
+  display: inline-flex; /* Используем inline-flex вместо flex */
+  flex-direction: column;
+  gap: 5px;
+  flex-shrink: 0; /* Предотвращаем сжатие элементов */
+}
+
+.my-appointment h2 {
+  color: darkgray;
+  font-size: 14px;
+  margin: 0;
+  text-align: left;
+}
+
+.my-appointment p {
+  text-align: left;
+}
+
+.my-appointment-list {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  overflow-x: auto; /* Используем auto вместо scroll для более естественного поведения */
+  white-space: nowrap; /* Предотвращаем перенос элементов на новую строку */
+  scrollbar-width: thin; /* Тонкая полоса прокрутки для Firefox */
+}
+
+@media screen and (min-width: 841px) {
+  /* Стили для Webkit-браузеров (Chrome, Safari) */
+  .my-appointment-list::-webkit-scrollbar {
+    height: 8px; /* Высота полосы прокрутки */
+  }
+
+  .my-appointment-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3); /* Цвет ползунка */
+    border-radius: 4px;
+  }
+
+  .my-appointment-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.5); /* Цвет при наведении */
+  }
+
+  .my-appointment-list {
+    flex-wrap: wrap;
+  }
+}
+
+.horizontal-appointment-list {
+  display: flex;
+  overflow-x: auto; /* Горизонтальный скролл */
+  gap: 20px; /* Отступ между карточками */
+  padding: 10px 10px;
+  white-space: nowrap; /* Предотвращает перенос элементов */
+  -webkit-overflow-scrolling: touch; /* Плавный скролл на мобильных устройствах */
+}
+
+.horizontal-appointment-list::-webkit-scrollbar {
+  height: 8px;
+}
+
+.horizontal-appointment-list .my-appointment {
+  min-width: 200px;
+  overflow-wrap: break-word;
+}
+
+.profile-cont {
+  margin-top: 50px;
+  overflow: auto;
+  height: calc(100% - 50px);
+}
+
+.user-profile-block {
+  border: none;
+  border-bottom: 1px dashed darkgrey;
+  background-color: transparent;
+  padding: 10px;
+}
+
+.telegram-info {
+  padding: 10px;
+  border-radius: 15px;
+  border: 1px dashed darkgrey;
+}
+
+.profile-info {
+  padding: 10px;
+  border-radius: 15px;
+  border: 1px dashed darkgrey;
+}
+
+.profile-cont-header {
+  margin-bottom: 20px;
+}
+
+.stylist-rating {
+  margin: 10px 0;
+}
+
+.stylist-rating h2 {
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+
+.stylist-rating div {
+  display: flex;
+  justify-content: center; /* Центрируем звёзды */
+  align-items: center;
+}
+
+.stylist-rating p {
+  font-size: 16px;
+}
+
+.star-rating {
+  display: flex;
+  justify-content: center; /* Центрируем звёзды */
+  gap: 5px;
+}
+
+.user-approve-cont {
+  margin-top: 30px;
+  height: 95%;
+  overflow: scroll;
+}
+
+.user-approve-cont h3 {
+  margin-top: 20px;
+}
+
+.user-approve-btn {
+  position: absolute;
+  bottom: 20px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.service-selection {
+  margin-top: 20px;
+}
+.service-list {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.service-slot {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.service-slot.selected {
+  background-color: #007bff;
+  color: white;
+}
+
+.register-cont {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.register-cont h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.register-cont p {
+  font-size: 16px;
+  text-align: center;
+}
