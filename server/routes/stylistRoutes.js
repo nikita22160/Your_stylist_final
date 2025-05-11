@@ -364,17 +364,9 @@ router.delete('/stylists/:id/appointments/:appointmentId', authenticateToken, as
     try {
         const { id, appointmentId } = req.params;
 
-        if (req.user.role !== 'stylist') {
-            return res.status(403).json({ message: 'Unauthorized: Only stylists can delete appointments' });
-        }
-
         const stylist = await Stylist.findById(id);
         if (!stylist) {
             return res.status(404).json({ message: 'Стилист не найден' });
-        }
-
-        if (normalizePhone(stylist.phone) !== normalizePhone(req.user.phone)) {
-            return res.status(403).json({ message: 'Unauthorized: You are not this stylist' });
         }
 
         const appointment = await Appointment.findById(appointmentId).populate('userId').populate('stylistId');
@@ -384,6 +376,15 @@ router.delete('/stylists/:id/appointments/:appointmentId', authenticateToken, as
 
         if (appointment.stylistId._id.toString() !== id) {
             return res.status(403).json({ message: 'Unauthorized: This appointment does not belong to this stylist' });
+        }
+
+        // Проверка прав: стилист или пользователь
+        if (req.user.role === 'stylist') {
+            if (normalizePhone(stylist.phone) !== normalizePhone(req.user.phone)) {
+                return res.status(403).json({ message: 'Unauthorized: You are not this stylist' });
+            }
+        } else if (appointment.userId._id.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Unauthorized: You can only cancel your own appointments' });
         }
 
         const userId = appointment.userId._id;

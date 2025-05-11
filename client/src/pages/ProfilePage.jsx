@@ -24,8 +24,6 @@ export default function ProfilePage() {
     const [scrollPosition, setScrollPosition] = useState(0);
     const appointmentListRef = useRef(null);
 
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
     const normalizePhone = (phone) => {
         if (!phone) return '';
         const digits = phone.replace(/\D/g, '');
@@ -123,7 +121,7 @@ export default function ProfilePage() {
                     appointmentsData = await appointmentsResponse.json();
                     console.log('Fetched stylist appointments:', appointmentsData);
                 } else {
-                    const appointmentsResponse = await fetch(`/api/appointments/user`, {
+                    const appointmentsResponse = await fetch('/api/appointments/user', {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
@@ -225,7 +223,7 @@ export default function ProfilePage() {
 
     const handleCancelAppointment = async (stylistId, appointmentId) => {
         try {
-            const response = await fetch(`${API_URL}/api/stylists/${stylistId}/appointments/${appointmentId}`, {
+            const response = await fetch(`/api/stylists/${stylistId}/appointments/${appointmentId}`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -243,6 +241,8 @@ export default function ProfilePage() {
             showError(`Ошибка при отмене записи: ${error.message}`);
             if (error.message.includes('Токен')) {
                 navigate('/');
+            } else if (error.message.includes('Failed to fetch')) {
+                showError('Не удалось подключиться к серверу. Проверьте интернет или попробуйте позже.');
             }
         }
     };
@@ -617,7 +617,7 @@ export default function ProfilePage() {
             {showPaymentModal && (
                 <PaymentModal
                     closeModal={closePaymentModal}
-                    paymentUrl={selectedPaymentUrl} // Передаем paymentUrl вместо paymentToken
+                    paymentUrl={selectedPaymentUrl}
                 />
             )}
         </div>

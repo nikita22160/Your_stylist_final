@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Calendar from 'react-calendar';
@@ -20,6 +20,15 @@ export default function StylistProfile() {
     const [showSignInModal, setShowSignInModal] = useState(false);
     const [averageRating, setAverageRating] = useState(0);
     const [hasReviews, setHasReviews] = useState(false);
+    const [stories, setStories] = useState([]);
+    const [showStoryGallery, setShowStoryGallery] = useState(false);
+    const [newStoryModal, setNewStoryModal] = useState(false);
+    const [storyText, setStoryText] = useState('');
+    const [avatarId, setAvatarId] = useState('');
+    const [voiceId, setVoiceId] = useState('0011dfc1f6f544f1b8a6988489d6bf47');
+    const [isLoading, setIsLoading] = useState(false);
+    const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
+    const storyContainerRef = useRef(null);
     const navigate = useNavigate();
     const { user, isAuthenticated, token } = useSelector((state) => state.auth);
 
@@ -93,9 +102,22 @@ export default function StylistProfile() {
             }
         };
 
+        const fetchStories = async () => {
+            try {
+                const response = await fetch(`/api/stylists/${id}/stories`, {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                });
+                const data = await response.json();
+                if (response.ok) setStories(data);
+            } catch (error) {
+                showError(`Ошибка загрузки сторис: ${error.message}`);
+            }
+        };
+
         fetchStylist();
         fetchAppointments();
         fetchReviews();
+        fetchStories();
     }, [id, token, isAuthenticated]);
 
     const handleDateChange = (date) => {
@@ -286,6 +308,8 @@ export default function StylistProfile() {
 
     const closeModal = () => {
         setModalType(null);
+        setNewStoryModal(false);
+        setIsLoading(false);
     };
 
     const handlePriceClick = () => {
@@ -304,6 +328,73 @@ export default function StylistProfile() {
     const switchToRegister = () => {
         setShowSignInModal(false);
         navigate('/');
+    };
+
+    const handleUserIconClick = () => {
+        if (!isAuthenticated) {
+            setShowSignInModal(true);
+        } else {
+            navigate('/profile');
+        }
+    };
+
+    const handleAddStory = async () => {
+        if (!storyText || !avatarId) {
+            showError('Пожалуйста, заполните все поля');
+            return;
+        }
+
+        setIsLoading(true);
+
+        try {
+            const response = await fetch('/api/stories', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    stylistId: id,
+                    text: storyText,
+                    avatarId,
+                    voiceId,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Не удалось создать сторис');
+            }
+
+            const newStory = await response.json();
+            setStories([newStory, ...stories]);
+            showSuccess('Сторис успешно добавлена!');
+            setNewStoryModal(false);
+            setStoryText('');
+            setAvatarId('');
+            setVoiceId('0011dfc1f6f544f1b8a6988489d6bf47');
+        } catch (error) {
+            showError(`Ошибка при создании сторис: ${error.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handlePhotoClick = () => {
+        setShowStoryGallery(true);
+        setCurrentStoryIndex(0);
+    };
+
+    const handlePrevStory = () => {
+        if (currentStoryIndex > 0) {
+            setCurrentStoryIndex(currentStoryIndex - 1);
+        }
+    };
+
+    const handleNextStory = () => {
+        if (currentStoryIndex < stories.length - 1) {
+            setCurrentStoryIndex(currentStoryIndex + 1);
+        }
     };
 
     const getServiceName = (serviceType) => {
@@ -341,13 +432,25 @@ export default function StylistProfile() {
             <div onClick={handleBackToCatalog} className="back-btn">
                 <img src="/img/back.svg" alt="Назад" />
             </div>
+            <div className="user-cont">
+                {isAuthenticated && user?.name && <div className="user-name">{user.name}</div>}
+                <div className="user-logo-cont" onClick={handleUserIconClick}>
+                    <img
+                        src="/img/User_Circle.svg"
+                        alt="User Icon"
+                        style={{ cursor: 'pointer' }}
+                        width={50}
+                        height={50}
+                    />
+                </div>
+            </div>
             <div className="stylist-page-header" onClick={() => navigate('/')}>
                 ТВОЙ СТИЛИСТ
             </div>
             <div className="stylist-info-cont">
                 <div className="stylist-main-info">
                     <div>
-                        <div className="stylist-photo-name">
+                        <div className="stylist-photo-name" onClick={handlePhotoClick}>
                             <div className="stylist-photo">
                                 <img src={stylist.photoLink} alt={`${stylist.name} ${stylist.surname}`} />
                             </div>
@@ -355,6 +458,11 @@ export default function StylistProfile() {
                                 {stylist.name} {stylist.surname}
                             </div>
                         </div>
+                        {isStylist && (
+                            <div className="contact-btn" onClick={() => setNewStoryModal(true)}>
+                                Добавить видео
+                            </div>
+                        )}
                         <div className="city-stylist">
                             <h2>Рейтинг</h2>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -534,6 +642,108 @@ export default function StylistProfile() {
                 <div className="modal-overlay" onClick={closeSignInModal}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <SignIn closeModal={closeSignInModal} switchToRegister={switchToRegister} />
+                    </div>
+                </div>
+            )}
+
+            {newStoryModal && (
+                <div className="modal-overlay" onClick={closeModal}>
+                    <div className="modal-content story-modal-content" onClick={(e) => e.stopPropagation()}>
+                        <h2 style={{ fontFamily: '"SF-Pro-Display-Thin", sans-serif' }}>Создать новую сторис</h2>
+                        {isLoading ? (
+                            <div style={{ textAlign: 'center', padding: '20px' }}>
+                                <div className="spinner" style={{
+                                    border: '4px solid rgba(0, 0, 0, 0.1)',
+                                    borderLeft: '4px solid #000',
+                                    borderRadius: '50%',
+                                    width: '24px',
+                                    height: '24px',
+                                    animation: 'spin 1s linear infinite',
+                                    margin: '0 auto'
+                                }}></div>
+                                <p>Генерация видео... Это может занять до 2 минут.</p>
+                            </div>
+                        ) : (
+                            <>
+                                <textarea
+                                    placeholder="Текст для видео"
+                                    value={storyText}
+                                    onChange={(e) => setStoryText(e.target.value)}
+                                    className="story-textarea"
+                                    disabled={isLoading}
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="ID аватара"
+                                    value={avatarId}
+                                    onChange={(e) => setAvatarId(e.target.value)}
+                                    className="story-input"
+                                    disabled={isLoading}
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="ID голоса (оставьте пустым для значения по умолчанию)"
+                                    value={voiceId}
+                                    onChange={(e) => setVoiceId(e.target.value)}
+                                    className="story-input"
+                                    disabled={isLoading}
+                                />
+                                <div className="story-modal-actions">
+                                    <button onClick={handleAddStory} className="story-modal-btn" disabled={isLoading}>
+                                        Создать видео
+                                    </button>
+                                    <button onClick={closeModal} className="story-modal-btn cancel-btn" disabled={isLoading}>
+                                        Отмена
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                    <style>
+                        {`
+                            @keyframes spin {
+                                0% { transform: rotate(0deg); }
+                                100% { transform: rotate(360deg); }
+                            }
+                        `}
+                    </style>
+                </div>
+            )}
+
+            {showStoryGallery && (
+                <div className="modal-overlay" onClick={() => setShowStoryGallery(false)}>
+                    <div className="modal-content story-gallery" onClick={(e) => e.stopPropagation()}>
+                        {stories.length > 0 ? (
+                            <div className="story-gallery-container">
+                                <button className="gallery-arrow left-arrow" onClick={handlePrevStory} disabled={currentStoryIndex === 0}>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                                        <path d="M15 18L9 12L15 6" />
+                                    </svg>
+                                </button>
+                                <div className="story-video-container">
+                                    <div className="story-video-list" style={{ transform: `translateX(-${currentStoryIndex * 100}%)` }}>
+                                        {stories.map((story, index) => (
+                                            <video
+                                                key={index}
+                                                src={story.videoUrl}
+                                                controls
+                                                className="story-video"
+                                                style={{ width: '100%', maxWidth: '800px' }} // Явно задаем ширину
+                                                autoPlay={index === currentStoryIndex}
+                                                muted={index !== currentStoryIndex}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                                <button className="gallery-arrow right-arrow" onClick={handleNextStory} disabled={currentStoryIndex === stories.length - 1}>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                                        <path d="M9 18L15 12L9 6" />
+                                    </svg>
+                                </button>
+                            </div>
+                        ) : (
+                            <p className="no-stories">Сторис пока нет</p>
+                        )}
                     </div>
                 </div>
             )}

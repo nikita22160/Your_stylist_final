@@ -21,6 +21,7 @@
     "multer": "^1.4.5-lts.2",
     "node-cron": "^3.0.3",
     "node-telegram-bot-api": "^0.66.0",
+    "request": "^2.88.2",
     "yookassa": "^0.1.1"
   },
   "devDependencies": {

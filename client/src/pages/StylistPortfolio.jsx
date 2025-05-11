@@ -222,7 +222,15 @@ export default function StylistPortfolio() {
 
     const switchToRegister = () => {
         setShowSignInModal(false);
-        navigate('/'); // Перенаправляем на главную страницу для регистрации
+        navigate('/');
+    };
+
+    const handleUserIconClick = () => {
+        if (!isAuthenticated) {
+            setShowSignInModal(true);
+        } else {
+            navigate('/profile');
+        }
     };
 
     if (!stylist) {
@@ -233,6 +241,18 @@ export default function StylistPortfolio() {
         <div className="main-container">
             <div onClick={() => navigate(`/stylist/${id}`)} className="back-btn">
                 <img src="/img/back.svg" alt="Назад" />
+            </div>
+            <div className="user-cont">
+                {isAuthenticated && user?.name && <div className="user-name">{user.name}</div>}
+                <div className="user-logo-cont" onClick={handleUserIconClick}>
+                    <img
+                        src="/img/User_Circle.svg"
+                        alt="User Icon"
+                        style={{ cursor: 'pointer' }}
+                        width={50}
+                        height={50}
+                    />
+                </div>
             </div>
             <div className="stylist-page-header" onClick={() => navigate('/')}>
                 ТВОЙ СТИЛИСТ
