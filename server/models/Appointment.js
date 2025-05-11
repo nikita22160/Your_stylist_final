@@ -16,14 +16,21 @@ const appointmentSchema = new mongoose.Schema({
         required: true,
     },
     time: {
-        type: String, // Например, "14:00"
+        type: String,
         required: true,
     },
     status: {
         type: String,
-        enum: ['В ожидании', 'Подтверждена'], // Возможные статусы
-        default: 'В ожидании', // По умолчанию "В ожидании"
+        enum: ['Ожидает оплаты', 'Ожидает подтверждения', 'Подтверждена', 'Отменена'],
+        default: 'Ожидает оплаты',
+    },
+    serviceType: {
+        type: String,
         required: true,
+    },
+    paymentUrl: { // Добавляем поле для URL оплаты
+        type: String,
+        default: null,
     },
 });
 

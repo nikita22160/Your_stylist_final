@@ -4,13 +4,15 @@ import { useNavigate } from 'react-router-dom';
 import { logout } from '../redux/slices/authSlice';
 import { showSuccess, showError } from '../components/ToastNotifications';
 import { persistor } from "../redux/store.js";
+import PaymentModal from '../components/PaymentModal';
 
 export default function ProfilePage() {
     const { user, token, isAuthenticated } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [appointments, setAppointments] = useState([]);
-    const [showQRModal, setShowQRModal] = useState(false);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [selectedPaymentUrl, setSelectedPaymentUrl] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [editedUser, setEditedUser] = useState({ name: '', surname: '', phone: '' });
     const [isTelegramConnected, setIsTelegramConnected] = useState(false);
@@ -37,12 +39,17 @@ export default function ProfilePage() {
                 surname: user.surname || '',
                 phone: user.phone || '',
             });
+        } else {
+            setEditedUser({ name: '', surname: '', phone: '' });
         }
     }, [user]);
 
     useEffect(() => {
         const checkIfStylist = async () => {
-            if (!isAuthenticated || !user || !token) return;
+            if (!isAuthenticated || !user || !token || !user._id) {
+                console.warn('User or token is missing, skipping stylist check');
+                return;
+            }
             try {
                 const response = await fetch('/api/stylists', {
                     headers: {
@@ -72,7 +79,7 @@ export default function ProfilePage() {
 
     useEffect(() => {
         const checkTelegramConnection = async () => {
-            if (!isAuthenticated || !token) return;
+            if (!isAuthenticated || !token || !user?. _id) return;
             try {
                 const response = await fetch('/api/check-telegram-user', {
                     headers: {
@@ -91,11 +98,12 @@ export default function ProfilePage() {
         };
 
         checkTelegramConnection();
-    }, [isAuthenticated, token]);
+    }, [isAuthenticated, token, user]);
 
     useEffect(() => {
         const fetchAppointmentsAndReviews = async () => {
-            if (!isAuthenticated || !user || !token) {
+            if (!isAuthenticated || !user || !token || !user._id) {
+                console.warn('User or token is missing, redirecting to home');
                 navigate('/');
                 return;
             }
@@ -113,6 +121,7 @@ export default function ProfilePage() {
                         throw new Error(errorData.message || 'Не удалось загрузить записи стилиста');
                     }
                     appointmentsData = await appointmentsResponse.json();
+                    console.log('Fetched stylist appointments:', appointmentsData);
                 } else {
                     const appointmentsResponse = await fetch(`/api/appointments/user`, {
                         headers: {
@@ -124,11 +133,16 @@ export default function ProfilePage() {
                         throw new Error(errorData.message || 'Не удалось загрузить записи');
                     }
                     appointmentsData = await appointmentsResponse.json();
+                    console.log('Fetched user appointments:', appointmentsData);
                 }
                 setAppointments(appointmentsData);
 
                 const reviewsData = {};
                 for (const appt of appointmentsData) {
+                    if (!appt || !appt.stylistId || !appt._id) {
+                        console.warn('Invalid appointment data:', appt);
+                        continue;
+                    }
                     const stylistIdForReview = isStylist ? stylistId : appt.stylistId._id;
                     const reviewsResponse = await fetch(`/api/stylists/${stylistIdForReview}/reviews`, {
                         headers: {
@@ -138,7 +152,7 @@ export default function ProfilePage() {
 
                     if (reviewsResponse.ok) {
                         const reviews = await reviewsResponse.json();
-                        const appointmentReview = reviews.find(review => review.appointmentId._id === appt._id);
+                        const appointmentReview = reviews.find((review) => review.appointmentId && review.appointmentId._id === appt._id);
                         if (appointmentReview) {
                             reviewsData[appt._id] = appointmentReview.rating;
                         }
@@ -167,9 +181,9 @@ export default function ProfilePage() {
         setIsEditing(!isEditing);
         if (isEditing) {
             setEditedUser({
-                name: user.name || '',
-                surname: user.surname || '',
-                phone: user.phone || '',
+                name: user?.name || '',
+                surname: user?.surname || '',
+                phone: user?.phone || '',
             });
         }
     };
@@ -180,6 +194,10 @@ export default function ProfilePage() {
     };
 
     const handleSaveChanges = async () => {
+        if (!user || !user._id) {
+            showError('Пользователь не авторизован');
+            return;
+        }
         try {
             const response = await fetch(`/api/users/${user._id}`, {
                 method: 'PATCH',
@@ -257,12 +275,18 @@ export default function ProfilePage() {
         }
     };
 
-    const handlePay = () => {
-        setShowQRModal(true);
+    const handlePay = (paymentUrl) => {
+        if (!paymentUrl) {
+            showError('URL оплаты отсутствует');
+            return;
+        }
+        setSelectedPaymentUrl(paymentUrl);
+        setShowPaymentModal(true);
     };
 
-    const closeQRModal = () => {
-        setShowQRModal(false);
+    const closePaymentModal = () => {
+        setShowPaymentModal(false);
+        setSelectedPaymentUrl(null);
     };
 
     const handleRating = async (stylistId, appointmentId, rating) => {
@@ -297,6 +321,7 @@ export default function ProfilePage() {
     };
 
     const canLeaveReview = (appt) => {
+        if (!appt || !appt.date || !appt.status) return false;
         const appointmentDateTime = new Date(appt.date);
         const [hours, minutes] = appt.time.split(':').map(Number);
         appointmentDateTime.setHours(hours, minutes, 0, 0);
@@ -307,7 +332,7 @@ export default function ProfilePage() {
 
     const scrollLeft = () => {
         if (appointmentListRef.current) {
-            const newPosition = scrollPosition - 220; // 220px - ширина одной карточки + отступ
+            const newPosition = scrollPosition - 220;
             appointmentListRef.current.scrollTo({
                 left: newPosition,
                 behavior: 'smooth',
@@ -325,6 +350,23 @@ export default function ProfilePage() {
             });
             setScrollPosition(newPosition);
         }
+    };
+
+    const getServiceName = (serviceType) => {
+        const serviceNames = {
+            perHour: 'Час работы',
+            perDay: 'День работы',
+            eventLook: 'Образ для мероприятия',
+            styleConsultation: 'Консультация по стилю',
+            wardrobeAnalysis: 'Разбор гардероба',
+            shoppingSupport: 'Шопинг-сопровождение',
+        };
+        return serviceNames[serviceType] || 'Неизвестная услуга';
+    };
+
+    const getServicePrice = (serviceType, stylistId) => {
+        const stylist = appointments.find((appt) => appt.stylistId?._id === stylistId)?.stylistId;
+        return stylist?.price?.[serviceType] || 'Цена не указана';
     };
 
     if (!isAuthenticated || !user) {
@@ -384,7 +426,7 @@ export default function ProfilePage() {
                             <p className="user-profile-block-head">Фамилия</p>
                             <div className="user-profile-block">{user?.surname || 'Не указано'}</div>
                             <p className="user-profile-block-head">Телефон</p>
-                            <div className="user-profile-block">{user?.phone || 'Не указано'}</div>
+                            <div className="user-profile-block">{user?.phone || 'Не указан'}</div>
                             <div className="contact-btn" onClick={handleEditToggle} style={{ marginTop: '20px' }}>
                                 Редактировать
                             </div>
@@ -418,10 +460,19 @@ export default function ProfilePage() {
                     <div className="horizontal-appointment-list" ref={appointmentListRef}>
                         {appointments.length > 0 ? (
                             appointments.map((appt) => {
+                                if (!appt || !appt._id) {
+                                    console.warn('Invalid appointment:', appt);
+                                    return null;
+                                }
                                 const hasReview = reviews[appt._id] !== undefined;
                                 const rating = reviews[appt._id] || 0;
                                 const canReview = !isStylist && canLeaveReview(appt);
                                 const currentHoveredRating = hoveredRating[appt._id] || 0;
+                                const stylistIdForPrice = isStylist ? stylistId : appt.stylistId?._id;
+
+                                console.log('Rendering appointment:', appt);
+                                console.log('Payment URL available:', !!appt.paymentUrl);
+                                console.log('Status condition:', appt.status === 'Ожидает оплаты');
 
                                 return (
                                     <div key={appt._id} className="my-appointment">
@@ -448,6 +499,10 @@ export default function ProfilePage() {
                                                 </p>
                                             </div>
                                         )}
+                                        <h2>Услуга</h2>
+                                        <p>
+                                            {getServiceName(appt.serviceType)} - {getServicePrice(appt.serviceType, stylistIdForPrice)} руб.
+                                        </p>
                                         <h2>Статус</h2>
                                         <p>{appt.status}</p>
 
@@ -495,7 +550,7 @@ export default function ProfilePage() {
                                         )}
 
                                         {isStylist ? (
-                                            !canLeaveReview(appt) && (
+                                            (appt.status === 'Ожидает подтверждения' || appt.status === 'Подтверждена') && (
                                                 <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '10px' }}>
                                                     <div
                                                         className="remove-appointment"
@@ -503,7 +558,7 @@ export default function ProfilePage() {
                                                     >
                                                         отменить
                                                     </div>
-                                                    {appt.status === 'В ожидании' && (
+                                                    {appt.status === 'Ожидает подтверждения' && (
                                                         <div
                                                             className="confirm-appointment"
                                                             onClick={() => handleConfirmAppointment(stylistId, appt._id)}
@@ -516,12 +571,15 @@ export default function ProfilePage() {
                                         ) : (
                                             !hasReview && !canLeaveReview(appt) && (
                                                 <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '10px' }}>
-                                                    {appt.status === 'В ожидании' && (
-                                                        <div className="confirm-appointment" onClick={handlePay}>
+                                                    {appt.status === 'Ожидает оплаты' && appt.paymentUrl && (
+                                                        <div
+                                                            className="confirm-appointment"
+                                                            onClick={() => handlePay(appt.paymentUrl)}
+                                                        >
                                                             Оплатить
                                                         </div>
                                                     )}
-                                                    {appt.status === 'В ожидании' && (
+                                                    {(appt.status === 'Ожидает оплаты' || appt.status === 'Ожидает подтверждения') && (
                                                         <div
                                                             className="remove-appointment"
                                                             onClick={() => handleCancelAppointment(appt.stylistId._id, appt._id)}
@@ -536,16 +594,16 @@ export default function ProfilePage() {
                                 );
                             })
                         ) : (
-                            <p>У вас пока нет записей.</p>
+                            <p>Загрузка записей...</p>
                         )}
                     </div>
                     {appointments.length > 0 && (
                         <>
                             <button className="gallery-arrow left-arrow" onClick={scrollLeft}>
-                                &larr;
+                                ←
                             </button>
                             <button className="gallery-arrow right-arrow" onClick={scrollRight}>
-                                &rarr;
+                                →
                             </button>
                         </>
                     )}
@@ -556,18 +614,11 @@ export default function ProfilePage() {
                 </div>
             </div>
 
-            {showQRModal && (
-                <div className="modal-overlay" onClick={closeQRModal}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <div className="register-cont">
-                            <p>Оплатите запись с помощью QR-кода:</p>
-                            <img src="/img/QR.png" alt="QR Code" style={{ maxWidth: '100%', height: 'auto' }} />
-                            <div className="contact-btn" onClick={closeQRModal}>
-                                Закрыть
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            {showPaymentModal && (
+                <PaymentModal
+                    closeModal={closePaymentModal}
+                    paymentUrl={selectedPaymentUrl} // Передаем paymentUrl вместо paymentToken
+                />
             )}
         </div>
     );

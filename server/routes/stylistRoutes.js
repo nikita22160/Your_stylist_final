@@ -6,6 +6,7 @@ const TelegramUser = require('../models/TelegramUser');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const { sendNotification } = require('../telegramBot');
+const axios = require('axios');
 
 dotenv.config();
 
@@ -34,12 +35,36 @@ const authenticateToken = (req, res, next) => {
     }
 };
 
+// Создание платежа через API ЮKassa
+const createPayment = async (paymentData) => {
+    try {
+        const response = await axios.post(
+            'https://api.yookassa.ru/v3/payments',
+            paymentData,
+            {
+                auth: {
+                    username: process.env.YOOKASSA_SHOP_ID,
+                    password: process.env.YOOKASSA_SECRET_KEY,
+                },
+                headers: {
+                    'Idempotence-Key': `idempotent-${Date.now()}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+        console.log('YooKassa payment response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Payment creation error:', error.response?.data || error.message);
+        throw new Error(`Failed to create payment: ${error.response?.data?.description || error.message}`);
+    }
+};
+
 // Создать нового стилиста
 router.post('/stylists', async (req, res) => {
     try {
         const { name, surname, phone, city, description, photoLink, chatLink } = req.body;
 
-        // Нормализуем номер телефона
         const normalizedPhone = normalizePhone(phone);
 
         const stylist = new Stylist({
@@ -95,6 +120,7 @@ router.get('/stylists/:id/appointments', authenticateToken, async (req, res) => 
         }
 
         const appointments = await Appointment.find(query).populate('userId').populate('stylistId');
+        console.log('Raw appointments with paymentUrl:', appointments);
         res.json(appointments);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -107,6 +133,7 @@ router.get('/appointments/user', authenticateToken, async (req, res) => {
         const appointments = await Appointment.find({ userId: req.user._id })
             .populate('userId')
             .populate('stylistId');
+        console.log('Raw user appointments with paymentUrl:', appointments);
         res.json(appointments);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -129,18 +156,16 @@ router.get('/check-telegram-user', authenticateToken, async (req, res) => {
     }
 });
 
-// Создать новую запись
+// Создать новую запись и сгенерировать confirmation_url
 router.post('/stylists/:id/appointments', authenticateToken, async (req, res) => {
     try {
-        const { userId, date, time } = req.body;
+        const { userId, date, time, serviceType } = req.body;
         const stylistId = req.params.id;
 
-        // Проверяем, что userId совпадает с _id пользователя из токена
         if (userId !== req.user._id) {
             return res.status(403).json({ message: 'Unauthorized: You can only book appointments for yourself' });
         }
 
-        // Проверяем, существует ли такая запись
         const existingAppointment = await Appointment.findOne({
             stylistId,
             date: new Date(date).setHours(0, 0, 0, 0),
@@ -150,21 +175,51 @@ router.post('/stylists/:id/appointments', authenticateToken, async (req, res) =>
             return res.status(400).json({ message: 'Это время уже занято' });
         }
 
+        const stylist = await Stylist.findById(stylistId);
+        if (!stylist || !stylist.price || !stylist.price[serviceType]) {
+            return res.status(400).json({ message: 'Услуга недоступна для этого стилиста' });
+        }
+
         const appointment = new Appointment({
             stylistId,
             userId,
             date,
             time,
-            status: 'В ожидании',
+            status: 'Ожидает оплаты',
+            serviceType,
         });
         await appointment.save();
 
-        // Популируем данные пользователя и стилиста перед отправкой ответа
+        // Создаём платеж через ЮKassa API
+        const payment = await createPayment({
+            amount: {
+                value: stylist.price[serviceType].toString(),
+                currency: 'RUB',
+            },
+            confirmation: {
+                type: 'redirect',
+                return_url: `http://localhost:3000/profile`,
+            },
+            capture: true,
+            description: `Оплата услуги "${serviceType}" у стилиста ${stylist.name} ${stylist.surname}`,
+            metadata: {
+                appointmentId: appointment._id.toString(),
+            },
+        });
+
+        // Сохраняем confirmation_url в записи
+        appointment.paymentUrl = payment.confirmation.confirmation_url; // Используем confirmation_url вместо confirmation_token
+        await appointment.save();
+        console.log('Saved appointment with paymentUrl:', appointment);
+
+        // Популируем данные перед отправкой ответа
         const populatedAppointment = await Appointment.findById(appointment._id)
             .populate('userId')
             .populate('stylistId');
 
-        // Формируем уведомления
+        console.log('Populated appointment with paymentUrl:', populatedAppointment);
+
+        // Уведомления
         const userIdFromAppointment = populatedAppointment.userId._id;
         const stylistIdFromAppointment = populatedAppointment.stylistId._id;
         const appointmentDate = new Date(appointment.date).toLocaleDateString('ru-RU');
@@ -182,23 +237,73 @@ router.post('/stylists/:id/appointments', authenticateToken, async (req, res) =>
 
         let botLink = null;
         if (userTelegram) {
-            const userMessage = `Новая запись к стилисту ${stylistName} на ${appointmentDate} в ${appointment.time} (Ожидает подтверждения).\n📞 Телефон стилиста: ${stylistPhone}\n💬 Связаться: ${stylistChatLink}`;
+            const userMessage = `Новая запись к стилисту ${stylistName} на ${appointmentDate} в ${appointment.time} (${serviceType.replace(/([A-Z])/g, ' $1').trim()} - ${stylist.price[serviceType]} руб.) (Ожидает оплаты).\n📞 Телефон стилиста: ${stylistPhone}\n💬 Связаться: ${stylistChatLink}`;
             await sendNotification(userTelegram.chatId, userMessage);
         } else {
             botLink = 'https://t.me/yout_stylist_bot';
         }
 
         if (stylistTelegram) {
-            const stylistMessage = `Новая запись от клиента ${userName} на ${appointmentDate} в ${appointment.time} (Ожидает подтверждения).\n📞 Телефон клиента: ${userPhone}\n💬 Связаться: ${userChatLink}`;
+            const stylistMessage = `Новая запись от клиента ${userName} на ${appointmentDate} в ${appointment.time} (${serviceType.replace(/([A-Z])/g, ' $1').trim()} - ${stylist.price[serviceType]} руб.) (Ожидает оплаты).\n📞 Телефон клиента: ${userPhone}\n💬 Связаться: ${userChatLink}`;
             await sendNotification(stylistTelegram.chatId, stylistMessage);
         }
 
         res.status(201).json({
             appointment: populatedAppointment,
+            paymentUrl: payment.confirmation.confirmation_url, // Возвращаем confirmation_url
             botLink: botLink ? botLink : undefined,
         });
     } catch (error) {
         res.status(400).json({ message: error.message });
+    }
+});
+
+// Обработка вебхуков от ЮKassa
+router.post('/webhook/yookassa', async (req, res) => {
+    try {
+        const event = req.body;
+
+        if (event.event === 'payment.succeeded') {
+            const payment = event.object;
+            const appointmentId = payment.metadata.appointmentId;
+
+            const appointment = await Appointment.findById(appointmentId).populate('userId').populate('stylistId');
+            if (!appointment) {
+                return res.status(404).json({ message: 'Запись не найдена' });
+            }
+
+            appointment.status = 'Ожидает подтверждения';
+            appointment.paymentUrl = null; // Очищаем URL после оплаты
+            await appointment.save();
+
+            // Уведомления
+            const userId = appointment.userId._id;
+            const userTelegram = await TelegramUser.findOne({ userId });
+            const appointmentDate = new Date(appointment.date).toLocaleDateString('ru-RU');
+            const stylistName = `${appointment.stylistId.name} ${appointment.stylistId.surname}`;
+            const stylistPhone = appointment.stylistId.phone;
+            const stylistChatLink = appointment.stylistId.chatLink || 'Свяжитесь через сайт';
+
+            if (userTelegram) {
+                const userMessage = `Оплата вашей записи к стилисту ${stylistName} на ${appointmentDate} в ${appointment.time} (${appointment.serviceType.replace(/([A-Z])/g, ' $1').trim()} - ${appointment.stylistId.price[appointment.serviceType]} руб.) прошла успешно. Ожидайте подтверждения стилиста.\n📞 Телефон стилиста: ${stylistPhone}\n💬 Связаться: ${stylistChatLink}`;
+                await sendNotification(userTelegram.chatId, userMessage);
+            }
+
+            const stylistId = appointment.stylistId._id;
+            const stylistTelegram = await TelegramUser.findOne({ userId: stylistId });
+            const userName = `${appointment.userId.name} ${appointment.userId.surname}`;
+            const userPhone = appointment.userId.phone;
+            const userChatLink = userTelegram && userTelegram.username ? `https://t.me/${userTelegram.username.replace('@', '')}` : 'Свяжитесь через сайт';
+
+            if (stylistTelegram) {
+                const stylistMessage = `Клиент ${userName} оплатил запись на ${appointmentDate} в ${appointment.time} (${appointment.serviceType.replace(/([A-Z])/g, ' $1').trim()} - ${appointment.stylistId.price[appointment.serviceType]} руб.). Ожидает вашего подтверждения.\n📞 Телефон клиента: ${userPhone}\n💬 Связаться: ${userChatLink}`;
+                await sendNotification(stylistTelegram.chatId, stylistMessage);
+            }
+        }
+
+        res.status(200).json({ message: 'Webhook received' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 });
 
@@ -207,45 +312,35 @@ router.patch('/stylists/:id/appointments/:appointmentId/confirm', authenticateTo
     try {
         const { id, appointmentId } = req.params;
 
-        // Проверяем роль пользователя
         if (req.user.role !== 'stylist') {
             return res.status(403).json({ message: 'Unauthorized: Only stylists can confirm appointments' });
         }
 
-        // Проверяем, что стилист существует
         const stylist = await Stylist.findById(id);
         if (!stylist) {
             return res.status(404).json({ message: 'Стилист не найден' });
         }
 
-        console.log('Stylist phone:', normalizePhone(stylist.phone), 'User phone:', normalizePhone(req.user.phone));
-
-        // Проверяем, что пользователь — это стилист
         if (normalizePhone(stylist.phone) !== normalizePhone(req.user.phone)) {
             return res.status(403).json({ message: 'Unauthorized: You are not this stylist' });
         }
 
-        // Находим запись
         const appointment = await Appointment.findById(appointmentId).populate('userId').populate('stylistId');
         if (!appointment) {
             return res.status(404).json({ message: 'Запись не найдена' });
         }
 
-        // Проверяем, что запись принадлежит этому стилисту
         if (appointment.stylistId._id.toString() !== id) {
             return res.status(403).json({ message: 'Unauthorized: This appointment does not belong to this stylist' });
         }
 
-        // Проверяем текущий статус
-        if (appointment.status !== 'В ожидании') {
-            return res.status(400).json({ message: 'Эта запись уже подтверждена или отменена' });
+        if (appointment.status !== 'Ожидает подтверждения') {
+            return res.status(400).json({ message: 'Эта запись не ожидает подтверждения' });
         }
 
-        // Обновляем статус на "Подтверждена"
         appointment.status = 'Подтверждена';
         await appointment.save();
 
-        // Отправляем уведомление пользователю о подтверждении
         const userId = appointment.userId._id;
         const userTelegram = await TelegramUser.findOne({ userId });
         const appointmentDate = new Date(appointment.date).toLocaleDateString('ru-RU');
@@ -254,7 +349,7 @@ router.patch('/stylists/:id/appointments/:appointmentId/confirm', authenticateTo
         const stylistChatLink = appointment.stylistId.chatLink || 'Свяжитесь через сайт';
 
         if (userTelegram) {
-            const userMessage = `Ваша запись к стилисту ${stylistName} на ${appointmentDate} в ${appointment.time} была подтверждена.\n📞 Телефон стилиста: ${stylistPhone}\n💬 Связаться: ${stylistChatLink}`;
+            const userMessage = `Ваша запись к стилисту ${stylistName} на ${appointmentDate} в ${appointment.time} (${appointment.serviceType.replace(/([A-Z])/g, ' $1').trim()} - ${stylist.price[appointment.serviceType]} руб.) была подтверждена.\n📞 Телефон стилиста: ${stylistPhone}\n💬 Связаться: ${stylistChatLink}`;
             await sendNotification(userTelegram.chatId, userMessage);
         }
 
@@ -269,47 +364,38 @@ router.delete('/stylists/:id/appointments/:appointmentId', authenticateToken, as
     try {
         const { id, appointmentId } = req.params;
 
-        // Проверяем роль пользователя
         if (req.user.role !== 'stylist') {
             return res.status(403).json({ message: 'Unauthorized: Only stylists can delete appointments' });
         }
 
-        // Проверяем, что стилист существует
         const stylist = await Stylist.findById(id);
         if (!stylist) {
             return res.status(404).json({ message: 'Стилист не найден' });
         }
 
-        console.log('Stylist phone:', normalizePhone(stylist.phone), 'User phone:', normalizePhone(req.user.phone));
-
-        // Проверяем, что пользователь — это стилист
         if (normalizePhone(stylist.phone) !== normalizePhone(req.user.phone)) {
             return res.status(403).json({ message: 'Unauthorized: You are not this stylist' });
         }
 
-        // Находим запись
         const appointment = await Appointment.findById(appointmentId).populate('userId').populate('stylistId');
         if (!appointment) {
             return res.status(404).json({ message: 'Запись не найдена' });
         }
 
-        // Проверяем, что запись принадлежит этому стилисту
         if (appointment.stylistId._id.toString() !== id) {
             return res.status(403).json({ message: 'Unauthorized: This appointment does not belong to this stylist' });
         }
 
-        // Отправляем уведомление пользователю об отмене
         const userId = appointment.userId._id;
         const userTelegram = await TelegramUser.findOne({ userId });
         const appointmentDate = new Date(appointment.date).toLocaleDateString('ru-RU');
         const stylistName = `${appointment.stylistId.name} ${appointment.stylistId.surname}`;
 
         if (userTelegram) {
-            const userMessage = `Ваша запись к стилисту ${stylistName} на ${appointmentDate} в ${appointment.time} была отменена.`;
+            const userMessage = `Ваша запись к стилисту ${stylistName} на ${appointmentDate} в ${appointment.time} (${appointment.serviceType.replace(/([A-Z])/g, ' $1').trim()} - ${stylist.price[appointment.serviceType]} руб.) была отменена.`;
             await sendNotification(userTelegram.chatId, userMessage);
         }
 
-        // Удаляем запись
         await Appointment.deleteOne({ _id: appointmentId });
         res.json({ message: 'Запись успешно удалена' });
     } catch (error) {

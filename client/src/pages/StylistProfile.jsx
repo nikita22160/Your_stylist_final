@@ -12,6 +12,7 @@ export default function StylistProfile() {
     const [stylist, setStylist] = useState(null);
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedTime, setSelectedTime] = useState(null);
+    const [selectedService, setSelectedService] = useState(null);
     const [appointments, setAppointments] = useState([]);
     const [modalType, setModalType] = useState(null);
     const [showBotModal, setShowBotModal] = useState(false);
@@ -100,10 +101,15 @@ export default function StylistProfile() {
     const handleDateChange = (date) => {
         setSelectedDate(date);
         setSelectedTime(null);
+        setSelectedService(null);
     };
 
     const handleTimeChange = (time) => {
         setSelectedTime(time);
+    };
+
+    const handleServiceChange = (service) => {
+        setSelectedService(service);
     };
 
     const handleBackToCatalog = () => {
@@ -139,6 +145,11 @@ export default function StylistProfile() {
             return;
         }
 
+        if (!selectedDate || !selectedTime || !selectedService) {
+            showError('Пожалуйста, выберите дату, время и тип услуги');
+            return;
+        }
+
         try {
             if (!token) {
                 throw new Error('Токен отсутствует. Пожалуйста, войдите в систему.');
@@ -154,6 +165,7 @@ export default function StylistProfile() {
                     userId: user._id,
                     date: selectedDate,
                     time: selectedTime,
+                    serviceType: selectedService,
                 }),
             });
 
@@ -172,6 +184,7 @@ export default function StylistProfile() {
 
             setSelectedDate(null);
             setSelectedTime(null);
+            setSelectedService(null);
         } catch (error) {
             showError(`Ошибка при записи: ${error.message}`);
         }
@@ -293,6 +306,32 @@ export default function StylistProfile() {
         navigate('/');
     };
 
+    const getServiceName = (serviceType) => {
+        const serviceNames = {
+            perHour: 'Час работы',
+            perDay: 'День работы',
+            eventLook: 'Образ для мероприятия',
+            styleConsultation: 'Консультация по стилю',
+            wardrobeAnalysis: 'Разбор гардероба',
+            shoppingSupport: 'Шопинг-сопровождение',
+        };
+        return serviceNames[serviceType] || 'Неизвестная услуга';
+    };
+
+    const getServicePrice = (serviceType) => {
+        return stylist?.price?.[serviceType] || 'Цена не указана';
+    };
+
+    const getAvailableServices = () => {
+        if (!stylist || !stylist.price) return [];
+        const validServices = ['perHour', 'perDay', 'eventLook', 'styleConsultation', 'wardrobeAnalysis', 'shoppingSupport'];
+        return Object.keys(stylist.price).filter(
+            (service) => validServices.includes(service) && stylist.price[service] && getServiceName(service) !== 'Неизвестная услуга'
+        );
+    };
+
+    const availableServices = getAvailableServices();
+
     if (!stylist) {
         return <div className="main-container">Загрузка...</div>;
     }
@@ -366,6 +405,10 @@ export default function StylistProfile() {
                                                     </p>
                                                     <p>Телефон: {appt.userId?.phone || 'Не указан'}</p>
                                                 </div>
+                                                <h2>Услуга</h2>
+                                                <p>
+                                                    {getServiceName(appt.serviceType)} - {getServicePrice(appt.serviceType)} руб.
+                                                </p>
                                                 <h2>Статус</h2>
                                                 <p>{appt.status}</p>
                                                 {!canLeaveReview(appt) && (
@@ -426,10 +469,30 @@ export default function StylistProfile() {
                                             </div>
                                         </div>
                                     )}
+                                    {selectedDate && selectedTime && stylist.price && (
+                                        <div className="time-selection">
+                                            <p>выберите услугу</p>
+                                            <div className="time-list">
+                                                {availableServices.length > 0 ? (
+                                                    availableServices.map((service) => (
+                                                        <div
+                                                            key={service}
+                                                            className={`time-slot ${selectedService === service ? 'selected' : ''}`}
+                                                            onClick={() => handleServiceChange(service)}
+                                                        >
+                                                            {getServiceName(service)} - {stylist.price[service]} руб.
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <p>Нет доступных услуг</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                                {selectedDate && selectedTime && (
+                                {selectedDate && selectedTime && selectedService && (
                                     <div
-                                        className={`contact-btn book-btn ${selectedDate && selectedTime ? 'active' : ''}`}
+                                        className={`contact-btn book-btn ${selectedDate && selectedTime && selectedService ? 'active' : ''}`}
                                         onClick={handleBookAppointment}
                                     >
                                         записаться
